@@ -6,13 +6,10 @@ const footerLinks = [
   { label: "MATCH LOGS", href: "/dashboard/logs" },
 ];
 
-export default function Footer({ sidebarEnabled = true }: { sidebarEnabled?: boolean }) {
+export default function Footer() {
   return (
-    <footer
-      className={`bg-[#0e0e0e] border-t-2 border-[rgba(37,99,235,0.2)] flex items-center justify-between px-8 py-2 transition-[margin] duration-300 ${
-        sidebarEnabled ? "ml-0" : "ml-0"
-      }`}
-    >
+    <footer className="bg-[#0e0e0e] border-t-2 border-[rgba(37,99,235,0.2)] flex flex-wrap items-center justify-between px-4 sm:px-8 py-2 gap-2">
+
       <div className="flex items-center gap-6">
         <span
           className="text-[10px] tracking-[2px] uppercase text-[rgba(226,226,226,0.3)]"

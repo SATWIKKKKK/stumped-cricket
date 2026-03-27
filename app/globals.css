@@ -51,7 +51,7 @@ body {
 /* Selection */
 ::selection {
   background: rgba(37, 99, 235, 0.3);
-  color: #e2e2e2;
+  color: #fcfcfc;
 }
 
 /* Utility classes */
@@ -144,4 +144,194 @@ body {
   height: 24px;
   border-bottom: 1px solid rgba(53,53,53,0.6);
   border-right: 1px solid rgba(53,53,53,0.6);
+}
+
+/* Ticket cut clip path */
+.ticket-cut {
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+}
+
+/* Grain overlay */
+.grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* Glassmorphism dropdown */
+.glass-overlay {
+  background: rgba(14, 14, 14, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Glitch text */
+.glitch-text {
+  text-shadow: 2px 0 #2563eb, -2px 0 #f00;
+}
+
+/* Asymmetric border */
+.asymmetric-border {
+  border-left: 4px solid #2563eb;
+}
+
+/* Heatmap cell */
+.heatmap-cell {
+  aspect-ratio: 1/1;
+}
+
+/* =========================================================
+   LIGHT MODE OVERRIDES
+   ========================================================= */
+
+/* Light‑mode CSS variables */
+[data-theme="light"] {
+  --bg-base: #fcfcfc;
+  --bg-card: #f3f3f5;
+  --bg-sidebar: #ecedf0;
+  --bg-elevated: #f7f7f9;
+  --bg-subtle: #fafafa;
+  --accent: #2563eb;
+  --accent-light: #1d4ed8;
+  --text-primary: #2563eb;
+  --text-secondary: #1e40af;
+}
+
+/* Body & html pick up CSS vars automatically */
+[data-theme="light"],
+[data-theme="light"] body {
+  background-color: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ---- Background overrides ---- */
+[data-theme="light"] [class*="bg-[#131313]"] { background-color: #fcfcfc !important; }
+[data-theme="light"] [class*="bg-[#1b1b1b]"] { background-color: #f3f3f5 !important; }
+[data-theme="light"] [class*="bg-[#0e0e0e]"] { background-color: #ecedf0 !important; }
+[data-theme="light"] [class*="bg-[#2a2a2a]"] { background-color: #f7f7f9 !important; }
+[data-theme="light"] [class*="bg-[#1f1f1f]"] { background-color: #f0f0f2 !important; }
+[data-theme="light"] [class*="bg-[#b4c5ff]"] { background-color: #2563eb !important; }
+[data-theme="light"] [class*="bg-black"] { background-color: rgba(0,0,0,0.15) !important; }
+
+/* Hover backgrounds */
+[data-theme="light"] [class*="hover:bg-[#2a2a2a]"]:hover { background-color: #f7f7f9 !important; }
+[data-theme="light"] [class*="hover:bg-[rgba(37,99,235,"]:hover { background-color: rgba(37,99,235,0.1) !important; }
+[data-theme="light"] [class*="hover:bg-[rgba(255,255,255,"]:hover { background-color: rgba(37,99,235,0.06) !important; }
+
+/* ---- Text overrides ---- */
+[data-theme="light"] [class*="text-[#e2e2e2]"] { color: #2563eb !important; }
+[data-theme="light"] [class*="text-[#c3c6d7]"] { color: #1e40af !important; }
+[data-theme="light"] [class*="text-[#b4c5ff]"] { color: #1d4ed8 !important; }
+[data-theme="light"] [class*="text-[#6b7280]"] { color: rgba(37,99,235,0.5) !important; }
+[data-theme="light"] [class*="text-white"] { color: #ffffff !important; }
+
+/* Muted gray text → muted blue text */
+[data-theme="light"] [class*="text-[rgba(195,198,215,"] { color: rgba(30,64,175,0.55) !important; }
+[data-theme="light"] [class*="text-[rgba(226,226,226,"] { color: rgba(30,64,175,0.55) !important; }
+
+/* Hover text */
+[data-theme="light"] [class*="hover:text-[#e2e2e2]"]:hover { color: #1e3a8a !important; }
+[data-theme="light"] [class*="hover:text-[#b4c5ff]"]:hover { color: #1d4ed8 !important; }
+[data-theme="light"] [class*="hover:text-[#ffd0d0]"]:hover { color: #dc2626 !important; }
+
+/* Placeholder */
+[data-theme="light"] [class*="placeholder-[#6b7280]"]::placeholder { color: rgba(37,99,235,0.4) !important; }
+
+/* ---- Border overrides ---- */
+[data-theme="light"] [class*="border-[rgba(67,70,85,"] { border-color: rgba(37,99,235,0.15) !important; }
+[data-theme="light"] [class*="border-[rgba(180,197,255,"] { border-color: rgba(37,99,235,0.2) !important; }
+[data-theme="light"] [class*="border-[rgba(37,99,235,"] { border-color: rgba(37,99,235,0.2) !important; }
+[data-theme="light"] [class*="border-[#b4c5ff]"] { border-color: #2563eb !important; }
+[data-theme="light"] [class*="border-l-4"][class*="border-[#b4c5ff]"] { border-left-color: #2563eb !important; }
+
+/* ---- Special backgrounds with rgba ---- */
+[data-theme="light"] [class*="bg-[rgba(67,70,85,"] { background-color: rgba(37,99,235,0.06) !important; }
+[data-theme="light"] [class*="bg-[rgba(255,255,255,"] { background-color: rgba(37,99,235,0.04) !important; }
+[data-theme="light"] [class*="bg-[rgba(37,99,235,0.1)"] { background-color: rgba(37,99,235,0.1) !important; }
+[data-theme="light"] [class*="bg-[rgba(37,99,235,0.04)"] { background-color: rgba(37,99,235,0.06) !important; }
+
+/* Status colors — keep distinctive */
+[data-theme="light"] [class*="text-[#ff453a]"] { color: #dc2626 !important; }
+[data-theme="light"] [class*="text-[#34c759]"] { color: #16a34a !important; }
+[data-theme="light"] [class*="text-[#ff9f9f]"] { color: #ef4444 !important; }
+[data-theme="light"] [class*="bg-[rgba(255,69,58,"] { background-color: rgba(220,38,38,0.08) !important; }
+[data-theme="light"] [class*="bg-[rgba(52,199,89,"] { background-color: rgba(22,163,74,0.08) !important; }
+
+/* ---- Scrollbar ---- */
+[data-theme="light"] ::-webkit-scrollbar-track { background: #f3f3f5; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c8c8cc; }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+
+/* ---- Selection ---- */
+[data-theme="light"] ::selection { background: rgba(37,99,235,0.2); color: #1e3a8a; }
+
+/* ---- Component overrides ---- */
+[data-theme="light"] .grain-overlay { opacity: 0.01; }
+[data-theme="light"] .glass-overlay {
+  background: rgba(252,252,252,0.94) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+[data-theme="light"] .glitch-text {
+  text-shadow: 2px 0 #2563eb, -2px 0 #1d4ed8;
+}
+[data-theme="light"] .text-gradient {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+[data-theme="light"] .glow-blue { box-shadow: 0 0 20px rgba(37,99,235,0.15); }
+[data-theme="light"] .glow-accent { box-shadow: 0 0 10px rgba(37,99,235,0.18); }
+
+/* Corner decorations */
+[data-theme="light"] .corner-tl::before { border-color: rgba(37,99,235,0.15); }
+[data-theme="light"] .corner-br::after { border-color: rgba(37,99,235,0.15); }
+
+/* Noise overlay */
+[data-theme="light"] .noise-overlay::before { opacity: 0.01; }
+
+/* Status live pulse — keep visible */
+[data-theme="light"] .status-live { color: #1d4ed8; }
+
+/* ---- Shadow override ---- */
+[data-theme="light"] [class*="shadow-xl"] { --tw-shadow-color: rgba(0,0,0,0.08); }
+
+/* bg-black/40 modal overlay */
+[data-theme="light"] [class*="bg-black/40"] { background-color: rgba(0,0,0,0.25) !important; }
+
+/* ---- Light mode card borders + blue hover ---- */
+[data-theme="light"] [class*="bg-[#1b1b1b]"] {
+  border: 1px solid rgba(37,99,235,0.12) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+[data-theme="light"] [class*="bg-[#1b1b1b]"]:hover {
+  border-color: rgba(37,99,235,0.35) !important;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.08);
+}
+
+/* Inner cards / nested surfaces */
+[data-theme="light"] [class*="bg-[#0e0e0e]"] {
+  border: 1px solid rgba(37,99,235,0.08) !important;
+  transition: border-color 0.2s ease;
+}
+[data-theme="light"] [class*="bg-[#0e0e0e]"]:hover {
+  border-color: rgba(37,99,235,0.25) !important;
+}
+
+/* Elevated surfaces */
+[data-theme="light"] [class*="bg-[#2a2a2a]"] {
+  border: 1px solid rgba(37,99,235,0.1) !important;
+  transition: border-color 0.2s ease;
+}
+[data-theme="light"] [class*="bg-[#2a2a2a]"]:hover {
+  border-color: rgba(37,99,235,0.3) !important;
+}
+
+[data-theme="light"] [class*="bg-[#1f1f1f]"] {
+  border: 1px solid rgba(37,99,235,0.08) !important;
+  transition: border-color 0.2s ease;
+}
+[data-theme="light"] [class*="bg-[#1f1f1f]"]:hover {
+  border-color: rgba(37,99,235,0.25) !important;
 }
