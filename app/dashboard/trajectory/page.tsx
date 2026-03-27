@@ -1,25 +1,120 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Play, RotateCcw, Activity, Target, Eye } from "lucide-react";
 
 type Verdict = "OUT" | "NOT_OUT" | null;
 
+type TrajectoryPoint = { x: number; y: number; z: number; t: number };
+
+type APITrajectory = {
+  preBounce: TrajectoryPoint[];
+  bouncePoint: TrajectoryPoint;
+  postBounce: TrajectoryPoint[];
+  projected: TrajectoryPoint[];
+  impactPoint: TrajectoryPoint;
+  stumpPlanePoint: TrajectoryPoint;
+  hittingWickets: boolean;
+  pitchingAnalysis: string;
+  impactAnalysis: string;
+  wicketsAnalysis: string;
+  confidence: number;
+  stats: {
+    releaseSpeed: number;
+    bounceHeight: number;
+    deviationAngle: number;
+    seamAngle: number;
+    spinRate: number;
+    velocity: number;
+  };
+};
+
+type BallStats = {
+  pitching: string;
+  impact: string;
+  wickets: string;
+  confidence: number;
+  deviation: number;
+  velocity: number;
+  spinRate: number;
+  bounceHeight: number;
+};
+
 const cameraAngles = ["BEHIND STUMPS", "SIDE ON POV", "DRONE ORTHO"];
+
+/** Convert 3D trajectory points to SVG path for the behind-stumps pitch view */
+function buildPitchSvg(
+  pre: TrajectoryPoint[],
+  post: TrajectoryPoint[],
+  viewBox: { w: number; h: number }
+): { mainPath: string; projPath: string; bounceCx: number; bounceCy: number; impactCx: number; impactCy: number } {
+  const all = [...pre, ...post];
+  const minZ = 0;
+  const maxZ = 21;
+  const rangeZ = maxZ - minZ;
+
+  const toSvg = (p: TrajectoryPoint) => {
+    const sx = viewBox.w / 2 + p.x * 300;
+    const sy = viewBox.h - ((p.z - minZ) / rangeZ) * (viewBox.h - 60) - 30;
+    return { sx, sy };
+  };
+
+  const preP = pre.map(toSvg);
+  const postP = post.map(toSvg);
+  const toD = (pts: { sx: number; sy: number }[]) =>
+    pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(" ");
+
+  const bounceP = pre.length > 0 ? toSvg(pre[pre.length - 1]) : { sx: 200, sy: 600 };
+  const impactP = postP.length > 0 ? postP[postP.length - 1] : bounceP;
+
+  return {
+    mainPath: toD([...preP, ...postP]),
+    projPath: "", // projected is beyond stumps
+    bounceCx: bounceP.sx,
+    bounceCy: bounceP.sy,
+    impactCx: impactP.sx,
+    impactCy: impactP.sy,
+  };
+}
 
 export default function DRSTrajectoryPage() {
   const [verdict, setVerdict] = useState<Verdict>("OUT");
   const [selectedAngle, setSelectedAngle] = useState(0);
   const [frame, setFrame] = useState(42);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [ballStats, setBallStats] = useState<BallStats>({
+    pitching: "IN LINE", impact: "IN LINE", wickets: "HITTING",
+    confidence: 99.8, deviation: 3.24, velocity: 142.8,
+    spinRate: 2400, bounceHeight: 0.68,
+  });
+  const [svgData, setSvgData] = useState({ mainPath: "M 200 700 C 200 500 220 350 205 280", projPath: "", bounceCx: 205, bounceCy: 280, impactCx: 205, impactCy: 100 });
 
-  const ballData = verdict === "NOT_OUT"
-    ? { pitching: "OUTSIDE LEG", impact: "OUTSIDE LINE", wickets: "MISSING", confidence: 87.6, deviation: 5.12, velocity: 138.2 }
-    : { pitching: "IN LINE", impact: "IN LINE", wickets: "HITTING", confidence: 99.8, deviation: 3.24, velocity: 142.8 };
+  const fetchTrajectory = useCallback(async (preset: string) => {
+    try {
+      const res = await fetch(`/api/drs/trajectory?preset=${preset}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const t: APITrajectory = data.trajectory;
+      setBallStats({
+        pitching: t.pitchingAnalysis,
+        impact: t.impactAnalysis,
+        wickets: t.wicketsAnalysis,
+        confidence: t.confidence,
+        deviation: t.stats.deviationAngle,
+        velocity: t.stats.velocity,
+        spinRate: t.stats.spinRate,
+        bounceHeight: t.stats.bounceHeight,
+      });
+      setSvgData(buildPitchSvg(t.preBounce, t.postBounce, { w: 400, h: 800 }));
+    } catch { /* keep existing */ }
+  }, []);
+
+  useEffect(() => { fetchTrajectory("out"); }, [fetchTrajectory]);
 
   function simulate(result: Verdict) {
     setIsAnimating(true);
     setVerdict(null);
+    fetchTrajectory(result === "NOT_OUT" ? "not_out" : "out");
     let f = 0;
     const interval = setInterval(() => {
       f += 1;
@@ -57,16 +152,15 @@ export default function DRSTrajectoryPage() {
             <line x1="150" y1="680" x2="250" y2="680" stroke="rgba(226,226,226,0.2)" strokeWidth="2" />
 
             {/* Ball trajectory */}
-            <path d="M 200 700 C 200 500 220 350 205 280" fill="none" stroke="#2563eb" strokeWidth="4">
+            <path d={svgData.mainPath} fill="none" stroke="#2563eb" strokeWidth="4">
               <animate attributeName="stroke-dashoffset" from="600" to="0" dur="2s" fill="freeze">
                 <set attributeName="begin" to="0s" />
               </animate>
             </path>
-            <path d="M 205 280 C 195 220 190 120 188 60" fill="none" stroke="#2563eb" strokeWidth="2" strokeDasharray="8 8" />
 
             {/* Impact point */}
-            <circle cx="205" cy="280" r="12" fill="#2563eb" className="animate-pulse" style={{ filter: "drop-shadow(0 0 15px #2563eb)" }} />
-            <circle cx="205" cy="280" r="4" fill="#e2e2e2" />
+            <circle cx={svgData.impactCx} cy={svgData.impactCy} r="12" fill="#2563eb" className="animate-pulse" style={{ filter: "drop-shadow(0 0 15px #2563eb)" }} />
+            <circle cx={svgData.impactCx} cy={svgData.impactCy} r="4" fill="#e2e2e2" />
 
             {/* Stumps */}
             <rect x="170" y="50" width="8" height="50" fill="rgba(53,53,53,0.8)" />
@@ -128,9 +222,9 @@ export default function DRSTrajectoryPage() {
             </span>
             <div className="space-y-4">
               {[
-                { label: "PITCHING", value: ballData.pitching },
-                { label: "IMPACT", value: ballData.impact },
-                { label: "WICKETS", value: ballData.wickets },
+                { label: "PITCHING", value: ballStats.pitching },
+                { label: "IMPACT", value: ballStats.impact },
+                { label: "WICKETS", value: ballStats.wickets },
               ].map((item) => (
                 <div key={item.label} className="flex justify-between items-end border-b border-[rgba(53,53,53,0.5)] pb-2">
                   <div>
@@ -153,7 +247,7 @@ export default function DRSTrajectoryPage() {
                 DEVIATION ANGLE
               </span>
               <div className="text-2xl font-black text-[#e2e2e2] mt-1" style={{ fontFamily: "'Epilogue', sans-serif" }}>
-                {ballData.deviation}&deg;{" "}
+                {ballStats.deviation}&deg;{" "}
                 <span className="text-xs font-normal text-[#2563eb]">OFF BREAK</span>
               </div>
             </div>
@@ -166,7 +260,7 @@ export default function DRSTrajectoryPage() {
                 RELEASE VELOCITY
               </div>
               <div className="text-xs font-bold text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {ballData.velocity} KM/H
+                {ballStats.velocity} KM/H
               </div>
             </div>
           </div>
@@ -214,10 +308,10 @@ export default function DRSTrajectoryPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 shrink-0">
           {[
-            { label: "SPIN RATE", value: "2400 RPM" },
-            { label: "BOUNCE HEIGHT", value: "0.68 M" },
-            { label: "SEAM ANGLE", value: "4.2\u00b0 L" },
-            { label: "CONFIDENCE", value: `${ballData.confidence}%` },
+            { label: "SPIN RATE", value: `${ballStats.spinRate} RPM` },
+            { label: "BOUNCE HEIGHT", value: `${ballStats.bounceHeight} M` },
+            { label: "SEAM ANGLE", value: `${ballStats.deviation}\u00b0` },
+            { label: "CONFIDENCE", value: `${ballStats.confidence}%` },
           ].map((s) => (
             <div key={s.label} className="flex flex-col">
               <span className="text-[9px] text-[rgba(226,226,226,0.4)] tracking-[1px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>

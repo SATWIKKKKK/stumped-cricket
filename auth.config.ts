@@ -1,12 +1,12 @@
-import type { NextAuthConfig } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 
 const authConfig = {
   pages: {
     signIn: "/auth/sign-in",
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
   },
-} satisfies NextAuthConfig;
+} satisfies Partial<NextAuthOptions>;
 
 export default authConfig;

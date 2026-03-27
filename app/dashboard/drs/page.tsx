@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Radar, Eye, Activity, Play, RotateCcw, CheckCircle2,
   XCircle, Volume2, Zap, Target,
@@ -8,9 +8,45 @@ import {
 
 type Verdict = "OUT" | "NOT_OUT" | null;
 
+type TrajectoryData = {
+  pitching: string;
+  impact: string;
+  wickets: string;
+  confidence: number;
+  velocity: number;
+  spinRate: number;
+  bounceHeight: number;
+  seamAngle: number;
+  deviation: number;
+};
+
+type TrajectoryPoint = { x: number; y: number; z: number; t: number };
+
+type APITrajectory = {
+  preBounce: TrajectoryPoint[];
+  bouncePoint: TrajectoryPoint;
+  postBounce: TrajectoryPoint[];
+  projected: TrajectoryPoint[];
+  impactPoint: TrajectoryPoint;
+  stumpPlanePoint: TrajectoryPoint;
+  hittingWickets: boolean;
+  pitchingAnalysis: string;
+  impactAnalysis: string;
+  wicketsAnalysis: string;
+  confidence: number;
+  stats: {
+    releaseSpeed: number;
+    bounceHeight: number;
+    deviationAngle: number;
+    seamAngle: number;
+    spinRate: number;
+    velocity: number;
+  };
+};
+
 const cameraAngles = ["BEHIND STUMPS", "SIDE ON POV", "DRONE ORTHO"];
 
-const ballPathDefaults = {
+const ballPathDefaults: TrajectoryData = {
   pitching: "IN LINE",
   impact: "IN LINE",
   wickets: "HITTING",
@@ -23,45 +59,97 @@ const ballPathDefaults = {
 };
 
 const reasoningOut = [
-  "Ball trajectory indicates sharp deviation from release point at 142.5 km/h.",
+  "Ball trajectory indicates sharp deviation from release point.",
   "Impact confirmed below knee roll; 3D projection clears all height variance.",
   "No edge detected via acoustic sensor array. Ultra-edge signal flatline.",
 ];
 
 const reasoningNotOut = [
   "Ball impact outside leg stump line; trajectory deviation exceeds threshold.",
-  "Height analysis indicates ball going over stumps with 87% probability.",
-  "Faint edge detected via Ultra-edge acoustic sensor at frame 38.",
+  "Height analysis indicates ball going over stumps with high probability.",
+  "Faint edge detected via Ultra-edge acoustic sensor at final frame.",
 ];
+
+/** Convert physics API 3D points into SVG path for the viewport */
+function buildSvgPath(
+  pre: TrajectoryPoint[],
+  post: TrajectoryPoint[],
+  viewBox: { w: number; h: number }
+): { prePath: string; postPath: string; impactCx: number; impactCy: number } {
+  const allZ = [...pre, ...post].map((p) => p.z);
+  const minZ = Math.min(...allZ, 0);
+  const maxZ = Math.max(...allZ, 20.12);
+  const rangeZ = maxZ - minZ || 1;
+
+  const toSvg = (p: TrajectoryPoint) => {
+    const sx = viewBox.w / 2 + p.x * 150; // scale x around centre
+    const sy = viewBox.h - ((p.z - minZ) / rangeZ) * viewBox.h * 0.85 - 30;
+    return { sx, sy };
+  };
+
+  const prePoints = pre.map(toSvg);
+  const postPoints = post.map(toSvg);
+
+  const toD = (pts: { sx: number; sy: number }[]) => {
+    if (pts.length === 0) return "";
+    return pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(" ");
+  };
+
+  const lastPost = postPoints[postPoints.length - 1] ?? prePoints[prePoints.length - 1] ?? { sx: 400, sy: 285 };
+
+  return {
+    prePath: toD(prePoints),
+    postPath: toD(postPoints),
+    impactCx: lastPost.sx,
+    impactCy: lastPost.sy,
+  };
+}
 
 export default function DRSSimulatorPage() {
   const [verdict, setVerdict] = useState<Verdict>(null);
   const [selectedAngle, setSelectedAngle] = useState(0);
   const [frame, setFrame] = useState(42);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [ballData, setBallData] = useState(ballPathDefaults);
+  const [ballData, setBallData] = useState<TrajectoryData>(ballPathDefaults);
+  const [svgPaths, setSvgPaths] = useState({ prePath: "M 50,400 Q 300,50 400,320", postPath: "", impactCx: 400, impactCy: 285 });
+
+  const fetchTrajectory = useCallback(async (preset: string) => {
+    try {
+      const res = await fetch(`/api/drs/trajectory?preset=${preset}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const traj: APITrajectory = data.trajectory;
+      setBallData({
+        pitching: traj.pitchingAnalysis,
+        impact: traj.impactAnalysis,
+        wickets: traj.wicketsAnalysis,
+        confidence: traj.confidence,
+        velocity: traj.stats.velocity,
+        spinRate: traj.stats.spinRate,
+        bounceHeight: traj.stats.bounceHeight,
+        seamAngle: traj.stats.seamAngle,
+        deviation: traj.stats.deviationAngle,
+      });
+      setSvgPaths(buildSvgPath(traj.preBounce, traj.postBounce, { w: 800, h: 450 }));
+    } catch {
+      /* keep existing data on error */
+    }
+  }, []);
+
+  // Fetch initial trajectory on mount
+  useEffect(() => { fetchTrajectory("out"); }, [fetchTrajectory]);
 
   function simulateReview(result: Verdict) {
     setIsAnimating(true);
     setVerdict(null);
+    const preset = result === "NOT_OUT" ? "not_out" : "out";
+    fetchTrajectory(preset);
     let f = 0;
     const interval = setInterval(() => {
       f += 1;
       setFrame(f);
       if (f >= 42) {
         clearInterval(interval);
-        if (result === "NOT_OUT") {
-          setBallData({
-            ...ballPathDefaults,
-            pitching: "OUTSIDE LEG",
-            impact: "OUTSIDE LINE",
-            wickets: "MISSING",
-            confidence: 87.6,
-            deviation: 5.12,
-          });
-        } else {
-          setBallData(ballPathDefaults);
-        }
         setVerdict(result);
         setIsAnimating(false);
       }
@@ -108,20 +196,32 @@ export default function DRSSimulatorPage() {
 
           {/* Ball Trajectory SVG */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 450">
-            <path
-              d="M 50,400 Q 300,50 400,320 T 400,280"
-              fill="none"
-              stroke="#2563eb"
-              strokeWidth="4"
-              strokeDasharray="8 4"
-              opacity="0.8"
-            >
-              <animate attributeName="stroke-dashoffset" from="100" to="0" dur="3s" repeatCount="indefinite" />
-            </path>
-            <circle cx="400" cy="285" r="12" fill="#2563eb" className="animate-pulse" style={{ filter: "drop-shadow(0 0 8px #2563eb)" }}>
+            {svgPaths.prePath && (
+              <path
+                d={svgPaths.prePath}
+                fill="none"
+                stroke="#2563eb"
+                strokeWidth="4"
+                strokeDasharray="8 4"
+                opacity="0.8"
+              >
+                <animate attributeName="stroke-dashoffset" from="100" to="0" dur="3s" repeatCount="indefinite" />
+              </path>
+            )}
+            {svgPaths.postPath && (
+              <path
+                d={svgPaths.postPath}
+                fill="none"
+                stroke="#b4c5ff"
+                strokeWidth="3"
+                strokeDasharray="6 4"
+                opacity="0.6"
+              />
+            )}
+            <circle cx={svgPaths.impactCx} cy={svgPaths.impactCy} r="12" fill="#2563eb" className="animate-pulse" style={{ filter: "drop-shadow(0 0 8px #2563eb)" }}>
               <animate attributeName="r" values="10;14;10" dur="2s" repeatCount="indefinite" />
             </circle>
-            <circle cx="400" cy="320" r="6" fill="#e2e2e2" opacity="0.5" />
+            <circle cx={svgPaths.impactCx} cy={svgPaths.impactCy} r="6" fill="#e2e2e2" opacity="0.5" />
           </svg>
 
           {/* Camera Info Overlay */}
