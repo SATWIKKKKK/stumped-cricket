@@ -39,6 +39,8 @@ const navSections = [
       { href: "/dashboard/fantasy", icon: Zap, label: "Fantasy XI" },
       { href: "/dashboard/radar", icon: Radar, label: "Radar" },
       { href: "/dashboard/trends", icon: Activity, label: "Trends" },
+      { href: "/dashboard/narrative", icon: Archive, label: "Match Narrative" },
+      { href: "/dashboard/bowling-load", icon: Activity, label: "Bowling Load" },
     ],
   },
   {
@@ -97,6 +99,8 @@ const routeLabels: Record<string, string> = {
   "/dashboard/field-ops": "FIELD PLACEMENT",
   "/dashboard/pricing": "INTEL TIERS",
   "/dashboard/trends": "TREND INTELLIGENCE",
+  "/dashboard/narrative": "MATCH NARRATIVE",
+  "/dashboard/bowling-load": "BOWLING LOAD TRACKER",
 };
 
 export default function TopNav({
