@@ -1,17 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   Zap, ArrowRight, CheckCircle, Users, Bolt,
   Activity, Shield, BarChart2, Globe, Star, Crosshair, Brain, Target, Gauge,
 } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
 
 /* ---- clip-path styles ---- */
 const ticketClip = "polygon(0% 5%, 5% 0%, 10% 5%, 15% 0%, 20% 5%, 25% 0%, 30% 5%, 35% 0%, 40% 5%, 45% 0%, 50% 5%, 55% 0%, 60% 5%, 65% 0%, 70% 5%, 75% 0%, 80% 5%, 85% 0%, 90% 5%, 95% 0%, 100% 5%, 100% 95%, 95% 100%, 90% 95%, 85% 100%, 80% 95%, 75% 100%, 70% 95%, 65% 100%, 60% 95%, 55% 100%, 50% 95%, 45% 100%, 40% 95%, 35% 100%, 30% 95%, 25% 100%, 20% 95%, 15% 100%, 10% 95%, 5% 100%, 0% 95%)";
@@ -124,14 +120,6 @@ const whyReasons = [
 export default function LandingContent() {
   const { data: session } = useSession();
   const router = useRouter();
-  const mainRef = useRef<HTMLDivElement>(null);
-  const glitterRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
-  const spokeRef = useRef<HTMLElement>(null);
-  const listenedRef = useRef<HTMLElement>(null);
-  const featuresRef = useRef<HTMLElement>(null);
-  const whyRef = useRef<HTMLElement>(null);
-  const footerRef = useRef<HTMLElement>(null);
 
   // Redirect signed-in users straight to dashboard
   useEffect(() => {
@@ -140,123 +128,58 @@ export default function LandingContent() {
     }
   }, [session, router]);
 
-  // Glitter animation
-  useEffect(() => {
-    if (!glitterRef.current) return;
-    const el = glitterRef.current;
-    const tl = gsap.timeline({ repeat: -1 });
-    tl.to(el, { boxShadow: "0 0 8px 3px rgba(37,99,235,0.8), 0 0 20px 6px rgba(37,99,235,0.4)", scale: 1.3, duration: 0.6, ease: "power2.inOut" })
-      .to(el, { boxShadow: "0 0 2px 1px rgba(37,99,235,0.3)", scale: 1, duration: 0.8, ease: "power2.inOut" })
-      .to({}, { duration: 2.5 });
-  }, []);
-
-  // GSAP scroll animations
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (heroRef.current) {
-        gsap.from(heroRef.current.querySelectorAll(".gsap-hero"), {
-          y: 40, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out",
-        });
-      }
-      if (spokeRef.current) {
-        gsap.from(spokeRef.current.querySelectorAll(".gsap-card"), {
-          y: 80, opacity: 0, rotation: -8, duration: 0.7, stagger: 0.15, ease: "back.out(1.4)",
-          scrollTrigger: { trigger: spokeRef.current, start: "top 80%" },
-        });
-      }
-      if (listenedRef.current) {
-        gsap.from(listenedRef.current.querySelectorAll(".gsap-ticket"), {
-          y: 60, opacity: 0, duration: 0.6, stagger: 0.12, ease: "power3.out",
-          scrollTrigger: { trigger: listenedRef.current, start: "top 80%" },
-        });
-      }
-      if (featuresRef.current) {
-        gsap.from(featuresRef.current.querySelectorAll(".gsap-feat"), {
-          y: 50, opacity: 0, duration: 0.5, stagger: 0.08, ease: "power2.out",
-          scrollTrigger: { trigger: featuresRef.current, start: "top 80%" },
-        });
-      }
-      if (whyRef.current) {
-        gsap.from(whyRef.current.querySelectorAll(".gsap-why"), {
-          x: -40, opacity: 0, duration: 0.6, stagger: 0.12, ease: "power3.out",
-          scrollTrigger: { trigger: whyRef.current, start: "top 80%" },
-        });
-      }
-      if (footerRef.current) {
-        gsap.from(footerRef.current, {
-          y: 30, opacity: 0, duration: 0.6, ease: "power2.out",
-          scrollTrigger: { trigger: footerRef.current, start: "top 95%" },
-        });
-      }
-    }, mainRef);
-    return () => ctx.revert();
-  }, []);
-
-  const handleBtnEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    gsap.to(e.currentTarget, { scale: 1.05, duration: 0.3, ease: "power2.out" });
-  };
-  const handleBtnLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: "power2.out" });
-  };
-
   const authHref = (path: string) => (session?.user?.id ? path : "/auth/sign-up");
 
   return (
-    <div ref={mainRef} className="min-h-screen bg-[#0a0a0a] text-[#e2e2e2] overflow-x-hidden" style={{ backgroundSize: "40px 40px", backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)" }}>
-      {/* Grain */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }} />
+    <div className="min-h-screen bg-[#0a0a0a] text-[#e2e2e2] overflow-x-hidden" style={{ backgroundSize: "40px 40px", backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)" }}>
 
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 px-6 py-4 flex justify-between items-center" style={{ background: "rgba(10,10,10,0.8)", backdropFilter: "blur(12px)" }}>
+      <nav className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 px-6 py-4 flex justify-between items-center bg-[#0a0a0a]/95">
         <div className="flex items-center gap-2">
           <span className="text-xl font-black tracking-tighter uppercase" style={{ fontFamily: "'Epilogue', sans-serif" }}>Stumped AI</span>
         </div>
         <div className="flex gap-3">
-          <Link href="/auth/sign-in" className="text-sm font-bold uppercase border border-white/20 px-5 py-2.5 hover:bg-white hover:text-black transition-all"
-            onMouseEnter={handleBtnEnter} onMouseLeave={handleBtnLeave}>
+          <Link href="/auth/sign-in" className="text-sm font-bold uppercase border border-white/20 px-5 py-2.5 hover:bg-white hover:text-black transition-all hover:scale-105 transform">
             Login
           </Link>
-          <Link href="/auth/sign-up" className="text-sm font-bold uppercase border border-[#2563eb] bg-[#2563eb] text-white px-5 py-2.5 hover:bg-white hover:text-black hover:border-white transition-all"
-            onMouseEnter={handleBtnEnter} onMouseLeave={handleBtnLeave}>
+          <Link href="/auth/sign-up" className="text-sm font-bold uppercase border border-[#2563eb] bg-[#2563eb] text-white px-5 py-2.5 hover:bg-white hover:text-black hover:border-white transition-all hover:scale-105 transform">
             Sign Up
           </Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <section ref={heroRef} className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-6">
+      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-6">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #2563eb, transparent 70%)" }} />
           <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: "radial-gradient(circle, #b4c5ff, transparent 70%)" }} />
         </div>
         <div className="max-w-5xl mx-auto text-center relative">
-          <div className="gsap-hero inline-flex items-center gap-2 mb-6">
-            <div ref={glitterRef} className="w-3 h-3 rounded-full bg-[#2563eb]" style={{ boxShadow: "0 0 2px 1px rgba(37,99,235,0.3)" }} />
+          <div className="inline-flex items-center gap-2 mb-6 animate-[fadeIn_0.6s_ease-out_both]">
+            <div className="w-3 h-3 rounded-full bg-[#2563eb] animate-[glitter_3s_ease-in-out_infinite]" />
             <span className="text-sm sm:text-base font-bold tracking-[2px] uppercase text-[#2563eb]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               AI-Powered Cricket Intelligence Platform
             </span>
           </div>
-          <h2 className="gsap-hero text-[40px] sm:text-[56px] lg:text-[96px] font-black tracking-[-4px] uppercase leading-[0.9] mb-6" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+          <h2 className="text-[40px] sm:text-[56px] lg:text-[96px] font-black tracking-[-4px] uppercase leading-[0.9] mb-6 animate-[fadeInUp_0.7s_ease-out_0.1s_both]" style={{ fontFamily: "'Epilogue', sans-serif" }}>
             Cricket <br />
             <span className="text-[#2563eb]">Reimagined</span>
           </h2>
-          <p className="gsap-hero text-base sm:text-xl max-w-2xl mx-auto leading-relaxed text-[rgba(195,198,215,0.6)] mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <p className="text-base sm:text-xl max-w-2xl mx-auto leading-relaxed text-[rgba(195,198,215,0.6)] mb-10 animate-[fadeInUp_0.7s_ease-out_0.2s_both]" style={{ fontFamily: "'Inter', sans-serif" }}>
             Industrial-grade analytics, real-time match intelligence, and biomechanical simulations &mdash; all powered by advanced AI systems.
           </p>
-          <div className="gsap-hero flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-[fadeInUp_0.7s_ease-out_0.3s_both]">
             <Link
               href={authHref("/dashboard")}
-              className="flex items-center gap-2 px-8 py-3.5 bg-[#2563eb] text-white text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#1d4ed8] transition-colors"
+              className="flex items-center gap-2 px-8 py-3.5 bg-[#2563eb] text-white text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#1d4ed8] transition-all hover:scale-105 transform"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              onMouseEnter={handleBtnEnter} onMouseLeave={handleBtnLeave}
             >
               Go to Dashboard <ArrowRight size={14} />
             </Link>
             <Link
               href={authHref("/dashboard/pricing")}
-              className="flex items-center gap-2 px-8 py-3.5 border border-[rgba(67,70,85,0.4)] text-[11px] font-bold tracking-[1.5px] uppercase hover:border-white hover:bg-white hover:text-black transition-all"
+              className="flex items-center gap-2 px-8 py-3.5 border border-[rgba(67,70,85,0.4)] text-[11px] font-bold tracking-[1.5px] uppercase hover:border-white hover:bg-white hover:text-black transition-all hover:scale-105 transform"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              onMouseEnter={handleBtnEnter} onMouseLeave={handleBtnLeave}
             >
               Upgrade to Premium <Zap size={14} />
             </Link>
@@ -265,7 +188,7 @@ export default function LandingContent() {
       </section>
 
       {/* ========== INDIA SPOKE. HERE'S HOW. ========== */}
-      <section ref={spokeRef} className="bg-[#e5e5e5] py-24 px-6 overflow-hidden">
+      <section className="bg-[#e5e5e5] py-24 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8 text-black border-b-2 border-black pb-8">
             <div className="flex items-center gap-4">
@@ -287,9 +210,9 @@ export default function LandingContent() {
           </h2>
 
           <div className="flex flex-wrap justify-center items-end gap-8 md:gap-12 relative pb-20">
-            {/* Triangle — wider so text doesnt clip */}
+            {/* Triangle */}
             <div
-              className="gsap-card w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] p-6 pt-24 sm:pt-28 flex flex-col items-center justify-end text-center -rotate-[5deg] hover:rotate-0 transition-transform cursor-pointer"
+              className="w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] p-6 pt-24 sm:pt-28 flex flex-col items-center justify-end text-center -rotate-[5deg] hover:rotate-0 transition-transform cursor-pointer"
               style={{ clipPath: triangleClip, background: "#262626" }}
             >
               <p className="text-base sm:text-lg md:text-xl font-black uppercase text-white leading-tight px-2" style={{ fontFamily: "'Epilogue', sans-serif" }}>
@@ -298,7 +221,7 @@ export default function LandingContent() {
             </div>
 
             {/* Ticket 1 (Blue) */}
-            <div className="gsap-card relative">
+            <div className="relative">
               <div className="absolute -top-12 -left-8 text-[#2563eb] text-7xl font-bold animate-pulse select-none">*</div>
               <div
                 className="w-[260px] sm:w-[320px] h-[340px] sm:h-[400px] p-8 sm:p-10 flex flex-col justify-center rotate-[3deg] hover:rotate-0 transition-transform"
@@ -311,7 +234,7 @@ export default function LandingContent() {
             </div>
 
             {/* House shape */}
-            <div className="gsap-card relative">
+            <div className="relative">
               <div
                 className="w-[300px] sm:w-[380px] h-[280px] sm:h-[350px] p-8 sm:p-12 pt-16 sm:pt-20 flex flex-col items-center justify-center text-center -rotate-[2deg] hover:rotate-0 transition-transform"
                 style={{ clipPath: houseClip, background: "#262626" }}
@@ -324,7 +247,7 @@ export default function LandingContent() {
 
             {/* Ticket 2 (Blue, tall) */}
             <div
-              className="gsap-card w-[240px] sm:w-[300px] h-[380px] sm:h-[450px] p-8 sm:p-10 flex flex-col justify-between rotate-[5deg] hover:rotate-0 transition-transform"
+              className="w-[240px] sm:w-[300px] h-[380px] sm:h-[450px] p-8 sm:p-10 flex flex-col justify-between rotate-[5deg] hover:rotate-0 transition-transform"
               style={{ clipPath: ticketClip, background: "#2563eb", boxShadow: "0 25px 50px rgba(0,0,0,0.4)" }}
             >
               <div>
@@ -343,7 +266,7 @@ export default function LandingContent() {
       </section>
 
       {/* ========== INDIA SPOKE. WE LISTENED. ========== */}
-      <section ref={listenedRef} className="bg-[#121212] py-24 px-6 border-y border-white/10">
+      <section className="bg-[#121212] py-24 px-6 border-y border-white/10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
@@ -358,7 +281,7 @@ export default function LandingContent() {
             {problemCards.map((c) => (
               <div
                 key={c.ref}
-                className={`gsap-ticket p-8 flex flex-col justify-between ${c.rotate} hover:rotate-0 transition-transform`}
+                className={`p-8 flex flex-col justify-between ${c.rotate} hover:rotate-0 transition-transform`}
                 style={{ clipPath: ticketClip, background: c.bg, color: c.textColor, aspectRatio: "3/4" }}
               >
                 <div className="flex justify-between items-start">
@@ -394,7 +317,7 @@ export default function LandingContent() {
       </section>
 
       {/* ========== FEATURES WE OFFER ========== */}
-      <section ref={featuresRef} className="py-24 px-6 relative">
+      <section className="py-24 px-6 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-[10px] font-bold tracking-[3px] uppercase text-[#2563eb] block mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -409,8 +332,7 @@ export default function LandingContent() {
               const Icon = f.icon;
               return (
                 <Link key={f.title} href={authHref(f.link)}
-                  className="gsap-feat p-6 border border-[rgba(67,70,85,0.15)] bg-[#0e0e0e] hover:border-[rgba(37,99,235,0.4)] transition-colors group block"
-                  onMouseEnter={handleBtnEnter} onMouseLeave={handleBtnLeave}
+                  className="p-6 border border-[rgba(67,70,85,0.15)] bg-[#0e0e0e] hover:border-[rgba(37,99,235,0.4)] transition-all hover:scale-[1.03] transform group block"
                 >
                   <div className="w-10 h-10 flex items-center justify-center bg-[rgba(37,99,235,0.1)] mb-5 group-hover:bg-[rgba(37,99,235,0.2)] transition-colors">
                     <Icon size={20} className="text-[#2563eb]" />
@@ -425,7 +347,7 @@ export default function LandingContent() {
       </section>
 
       {/* ========== WHY STUMPED AI ========== */}
-      <section ref={whyRef} className="py-24 px-6 border-t border-white/10 bg-[#0e0e0e]">
+      <section className="py-24 px-6 border-t border-white/10 bg-[#0e0e0e]">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-[10px] font-bold tracking-[3px] uppercase text-[#2563eb] block mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -440,7 +362,7 @@ export default function LandingContent() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {whyReasons.map((r, i) => (
-              <div key={r.title} className="gsap-why border-l-4 pl-6 py-4" style={{ borderColor: i === 0 ? "#2563eb" : "rgba(255,255,255,0.1)" }}>
+              <div key={r.title} className="border-l-4 pl-6 py-4" style={{ borderColor: i === 0 ? "#2563eb" : "rgba(255,255,255,0.1)" }}>
                 <h4 className="text-sm font-black uppercase tracking-widest mb-2" style={{ fontFamily: "'Epilogue', sans-serif", color: i === 0 ? "#2563eb" : "white" }}>{r.title}</h4>
                 <p className="text-white/50 text-sm leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>{r.desc}</p>
               </div>
@@ -449,9 +371,8 @@ export default function LandingContent() {
           <div className="mt-14 text-center">
             <Link
               href={authHref("/dashboard")}
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#2563eb] text-white text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#1d4ed8] transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#2563eb] text-white text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#1d4ed8] transition-all hover:scale-105 transform"
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              onMouseEnter={handleBtnEnter} onMouseLeave={handleBtnLeave}
             >
               Start Exploring <ArrowRight size={14} />
             </Link>
@@ -460,7 +381,7 @@ export default function LandingContent() {
       </section>
 
       {/* Footer */}
-      <footer ref={footerRef} className="bg-[#0a0a0a] border-t border-white/10 py-20 px-6">
+      <footer className="bg-[#0a0a0a] border-t border-white/10 py-20 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12">
           <div className="max-w-sm">
             <div className="flex items-center gap-2 mb-6">
