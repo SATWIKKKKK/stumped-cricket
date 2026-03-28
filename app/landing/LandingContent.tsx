@@ -131,7 +131,7 @@ export default function LandingContent() {
   const authHref = (path: string) => (session?.user?.id ? path : "/auth/sign-up");
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#e2e2e2] overflow-x-hidden" style={{ backgroundSize: "40px 40px", backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)" }}>
+    <div className="min-h-screen md:mt-6 bg-[#0a0a0a] text-[#e2e2e2] overflow-x-hidden" style={{ backgroundSize: "40px 40px", backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)" }}>
 
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-40 border-b border-white/10 px-6 py-4 flex justify-between items-center bg-[#0a0a0a]/95">
@@ -261,6 +261,40 @@ export default function LandingContent() {
                 </p>
               </div>
             </div>
+
+            {/* Ticket 3 (Dark) */}
+            <div
+              className="w-[260px] sm:w-[320px] h-[340px] sm:h-[400px] p-8 sm:p-10 flex flex-col justify-between -rotate-[3deg] hover:rotate-0 transition-transform"
+              style={{ clipPath: ticketClip, background: "#262626", boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
+            >
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-white uppercase leading-[0.95]" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+                  Only 12%<br />of Teams<br />Use Data<br />Beyond<br />Scorecards.
+                </p>
+              </div>
+              <div className="border-t border-dotted border-white/40 pt-6">
+                <p className="text-[10px] font-bold text-[#2563eb] uppercase" style={{ fontFamily: "'Space Grotesk', monospace" }}>
+                  The rest are guessing.
+                </p>
+              </div>
+            </div>
+
+            {/* Ticket 4 (Blue) */}
+            <div
+              className="w-[260px] sm:w-[320px] h-[320px] sm:h-[380px] p-8 sm:p-10 flex flex-col justify-between rotate-[4deg] hover:rotate-0 transition-transform"
+              style={{ clipPath: ticketClip, background: "#2563eb", boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }}
+            >
+              <div>
+                <p className="text-2xl sm:text-3xl font-black text-white uppercase leading-[0.95]" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+                  1 in 4<br />Match-Winning<br />Moments Go<br />Unnoticed.
+                </p>
+              </div>
+              <div className="border-t border-dotted border-white/40 pt-6">
+                <p className="text-[10px] font-bold text-white/80 uppercase" style={{ fontFamily: "'Space Grotesk', monospace" }}>
+                  Until now.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -317,13 +351,13 @@ export default function LandingContent() {
       </section>
 
       {/* ========== FEATURES WE OFFER ========== */}
-      <section className="py-24 px-6 relative">
+      <section className="py-24 px-6 relative bg-[#e5e5e5]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-[10px] font-bold tracking-[3px] uppercase text-[#2563eb] block mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               CAPABILITIES
             </span>
-            <h3 className="text-3xl sm:text-4xl font-black tracking-[-2px] uppercase" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+            <h3 className="text-3xl sm:text-4xl font-black tracking-[-2px] uppercase text-black" style={{ fontFamily: "'Epilogue', sans-serif" }}>
               Features We <span className="text-[#2563eb]">Offer</span>
             </h3>
           </div>
@@ -332,13 +366,13 @@ export default function LandingContent() {
               const Icon = f.icon;
               return (
                 <Link key={f.title} href={authHref(f.link)}
-                  className="p-6 border border-[rgba(67,70,85,0.15)] bg-[#0e0e0e] hover:border-[rgba(37,99,235,0.4)] transition-all hover:scale-[1.03] transform group block"
+                  className="p-6 border border-black/10 bg-white hover:border-[#2563eb] transition-all hover:scale-[1.03] transform group block"
                 >
                   <div className="w-10 h-10 flex items-center justify-center bg-[rgba(37,99,235,0.1)] mb-5 group-hover:bg-[rgba(37,99,235,0.2)] transition-colors">
                     <Icon size={20} className="text-[#2563eb]" />
                   </div>
-                  <h4 className="text-[13px] font-black tracking-[-0.5px] uppercase mb-2" style={{ fontFamily: "'Epilogue', sans-serif" }}>{f.title}</h4>
-                  <p className="text-[11px] leading-relaxed text-[rgba(195,198,215,0.5)]" style={{ fontFamily: "'Inter', sans-serif" }}>{f.desc}</p>
+                  <h4 className="text-[13px] font-black tracking-[-0.5px] uppercase mb-2 text-black" style={{ fontFamily: "'Epilogue', sans-serif" }}>{f.title}</h4>
+                  <p className="text-[11px] leading-relaxed text-black/50" style={{ fontFamily: "'Inter', sans-serif" }}>{f.desc}</p>
                 </Link>
               );
             })}

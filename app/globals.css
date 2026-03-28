@@ -219,15 +219,15 @@ body {
 [data-theme="light"] [class*="hover:bg-[rgba(255,255,255,"]:hover { background-color: rgba(37,99,235,0.06) !important; }
 
 /* ---- Text overrides ---- */
-[data-theme="light"] [class*="text-[#e2e2e2]"] { color: #2563eb !important; }
-[data-theme="light"] [class*="text-[#c3c6d7]"] { color: #1e40af !important; }
+[data-theme="light"] [class*="text-[#e2e2e2]"] { color: #1e3a8a !important; }
+[data-theme="light"] [class*="text-[#c3c6d7]"] { color: #1e3a8a !important; }
 [data-theme="light"] [class*="text-[#b4c5ff]"] { color: #1d4ed8 !important; }
-[data-theme="light"] [class*="text-[#6b7280]"] { color: rgba(37,99,235,0.5) !important; }
+[data-theme="light"] [class*="text-[#6b7280]"] { color: #475569 !important; }
 [data-theme="light"] [class*="text-white"] { color: #ffffff !important; }
 
-/* Muted gray text → muted blue text */
-[data-theme="light"] [class*="text-[rgba(195,198,215,"] { color: rgba(30,64,175,0.55) !important; }
-[data-theme="light"] [class*="text-[rgba(226,226,226,"] { color: rgba(30,64,175,0.55) !important; }
+/* Muted gray text → solid dark grey/blue (much more visible) */
+[data-theme="light"] [class*="text-[rgba(195,198,215,"] { color: #475569 !important; }
+[data-theme="light"] [class*="text-[rgba(226,226,226,"] { color: #475569 !important; }
 
 /* Hover text */
 [data-theme="light"] [class*="hover:text-[#e2e2e2]"]:hover { color: #1e3a8a !important; }
@@ -235,14 +235,16 @@ body {
 [data-theme="light"] [class*="hover:text-[#ffd0d0]"]:hover { color: #dc2626 !important; }
 
 /* Placeholder */
-[data-theme="light"] [class*="placeholder-[#6b7280]"]::placeholder { color: rgba(37,99,235,0.4) !important; }
+[data-theme="light"] [class*="placeholder-[#6b7280]"]::placeholder { color: #94a3b8 !important; }
 
 /* ---- Border overrides ---- */
-[data-theme="light"] [class*="border-[rgba(67,70,85,"] { border-color: rgba(37,99,235,0.15) !important; }
-[data-theme="light"] [class*="border-[rgba(180,197,255,"] { border-color: rgba(37,99,235,0.2) !important; }
-[data-theme="light"] [class*="border-[rgba(37,99,235,"] { border-color: rgba(37,99,235,0.2) !important; }
+[data-theme="light"] [class*="border-[rgba(67,70,85,"] { border-color: rgba(37,99,235,0.2) !important; }
+[data-theme="light"] [class*="border-[rgba(180,197,255,"] { border-color: rgba(37,99,235,0.3) !important; }
+[data-theme="light"] [class*="border-[rgba(37,99,235,"] { border-color: rgba(37,99,235,0.25) !important; }
 [data-theme="light"] [class*="border-[#b4c5ff]"] { border-color: #2563eb !important; }
 [data-theme="light"] [class*="border-l-4"][class*="border-[#b4c5ff]"] { border-left-color: #2563eb !important; }
+[data-theme="light"] [class*="border-white/10"] { border-color: rgba(37,99,235,0.15) !important; }
+[data-theme="light"] [class*="border-white/5"] { border-color: rgba(37,99,235,0.08) !important; }
 
 /* ---- Special backgrounds with rgba ---- */
 [data-theme="light"] [class*="bg-[rgba(67,70,85,"] { background-color: rgba(37,99,235,0.06) !important; }
@@ -302,38 +304,75 @@ body {
 
 /* ---- Light mode card borders + blue hover ---- */
 [data-theme="light"] [class*="bg-[#1b1b1b]"] {
-  border: 1px solid rgba(37,99,235,0.12) !important;
+  border: 1px solid rgba(37,99,235,0.2) !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 [data-theme="light"] [class*="bg-[#1b1b1b]"]:hover {
-  border-color: rgba(37,99,235,0.35) !important;
-  box-shadow: 0 0 0 1px rgba(37,99,235,0.08);
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.15);
 }
 
 /* Inner cards / nested surfaces */
 [data-theme="light"] [class*="bg-[#0e0e0e]"] {
-  border: 1px solid rgba(37,99,235,0.08) !important;
+  border: 1px solid rgba(37,99,235,0.15) !important;
   transition: border-color 0.2s ease;
 }
 [data-theme="light"] [class*="bg-[#0e0e0e]"]:hover {
-  border-color: rgba(37,99,235,0.25) !important;
+  border-color: rgba(37,99,235,0.5) !important;
 }
 
 /* Elevated surfaces */
 [data-theme="light"] [class*="bg-[#2a2a2a]"] {
-  border: 1px solid rgba(37,99,235,0.1) !important;
+  border: 1px solid rgba(37,99,235,0.18) !important;
   transition: border-color 0.2s ease;
 }
 [data-theme="light"] [class*="bg-[#2a2a2a]"]:hover {
-  border-color: rgba(37,99,235,0.3) !important;
+  border-color: #2563eb !important;
 }
 
 [data-theme="light"] [class*="bg-[#1f1f1f]"] {
-  border: 1px solid rgba(37,99,235,0.08) !important;
+  border: 1px solid rgba(37,99,235,0.15) !important;
   transition: border-color 0.2s ease;
 }
 [data-theme="light"] [class*="bg-[#1f1f1f]"]:hover {
-  border-color: rgba(37,99,235,0.25) !important;
+  border-color: rgba(37,99,235,0.5) !important;
+}
+
+/* ---- Navbar light mode ---- */
+[data-theme="light"] header[class*="bg-[#0e0e0e]"] {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid rgba(37,99,235,0.15) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+[data-theme="light"] header [class*="text-[#e2e2e2]"] { color: #1e3a8a !important; }
+[data-theme="light"] header [class*="text-[rgba(226,226,226,"] { color: #475569 !important; }
+[data-theme="light"] header [class*="hover:text-[#e2e2e2]"]:hover { color: #1e3a8a !important; }
+[data-theme="light"] header input { color: #1e3a8a !important; }
+[data-theme="light"] header [class*="bg-[#1f1f1f]"] {
+  background-color: #f1f5f9 !important;
+  border-bottom-color: #2563eb !important;
+}
+
+/* ---- Profile / dropdown menus in light mode ---- */
+[data-theme="light"] header [class*="bg-[#1b1b1b]"] {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(37,99,235,0.15) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+[data-theme="light"] header [class*="hover:bg-[#2a2a2a]"]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* ---- Chart tooltip in light mode ---- */
+[data-theme="light"] [class*="bg-[#0e0e0e]"][class*="border"] {
+  background-color: #ffffff !important;
+  border-color: rgba(37,99,235,0.2) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ---- Dashboard layout bg ---- */
+[data-theme="light"] [class*="bg-[#131313]"] {
+  background-color: #f8fafc !important;
 }
 
 /* Landing page animations — CSS only, no JS overhead */

@@ -53,6 +53,36 @@ export default function DashboardPage() {
   const todayMatches = matches.length;
   const topPlayers = useMemo(() => [...players].sort((a, b) => b.score - a.score).slice(0, 3), [players]);
 
+  if (loading) {
+    return (
+      <div className="p-4 sm:p-8 flex flex-col gap-8 sm:gap-12 max-w-[1280px] animate-pulse">
+        <div className="border-l-4 border-[rgba(180,197,255,0.2)] pl-5 sm:pl-7 flex flex-col gap-3">
+          <div className="h-12 w-64 bg-[#1b1b1b]" />
+          <div className="h-3 w-96 bg-[#1b1b1b]" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-[#1b1b1b] border-t-2 border-[rgba(180,197,255,0.1)] p-4 sm:p-6 flex flex-col gap-3">
+              <div className="h-2 w-24 bg-[#2a2a2a]" />
+              <div className="h-8 w-16 bg-[#2a2a2a]" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 bg-[#1b1b1b] h-[300px]" />
+          <div className="lg:col-span-4 flex flex-col gap-5">
+            <div className="bg-[#2a2a2a] h-[200px]" />
+            <div className="bg-[#1b1b1b] h-[80px]" />
+          </div>
+        </div>
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 lg:col-span-8 bg-[#1b1b1b] h-[280px]" />
+          <div className="col-span-12 lg:col-span-4 bg-[#1b1b1b] h-[280px]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 sm:p-8 flex flex-col gap-8 sm:gap-12 max-w-[1280px]">
       <div className="border-l-4 border-[#b4c5ff] pl-5 sm:pl-7 flex flex-col gap-2">
