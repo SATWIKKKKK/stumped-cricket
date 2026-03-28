@@ -88,42 +88,52 @@ export default function LandingContent() {
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-[90vh] pt-32 pb-20 px-6 flex flex-col items-center justify-center text-center overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="w-full h-full bg-gradient-to-b from-transparent via-[#2563eb]/5 to-transparent" />
+      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-6">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: "radial-gradient(circle, #2563eb, transparent 70%)" }} />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: "radial-gradient(circle, #b4c5ff, transparent 70%)" }} />
         </div>
-        <div className="relative z-10 max-w-6xl w-full">
-          <p className="text-[#2563eb] font-bold tracking-[0.3em] uppercase mb-4 text-sm md:text-base" style={{ fontFamily: "'Epilogue', sans-serif" }}>
-            Advanced Cricket Intelligence Engine
+        <div className="max-w-5xl mx-auto text-center relative">
+          <div className="inline-block px-4 py-1.5 mb-6 border border-[rgba(37,99,235,0.3)] bg-[rgba(37,99,235,0.08)]">
+            <span className="text-[10px] font-bold tracking-[2px] uppercase text-[#2563eb]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              AI-Powered Cricket Intelligence Platform
+            </span>
+          </div>
+          <h2 className="text-[40px] sm:text-[56px] lg:text-[72px] font-black tracking-[-4px] uppercase leading-[0.9] mb-6" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+            Cricket <br />
+            <span className="text-[#2563eb]">Reimagined</span>
+          </h2>
+          <p className="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed text-[rgba(195,198,215,0.6)] mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Industrial-grade analytics, real-time match intelligence, and biomechanical simulations — all powered by advanced AI systems.
           </p>
-          <h1 className="text-[56px] sm:text-[80px] md:text-[140px] lg:text-[180px] font-black uppercase leading-[0.85] tracking-[-0.05em] mb-8 select-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
-            DOMINATE<br />
-            <span className="bg-white text-black px-4 inline-block">THE PITCH</span>
-          </h1>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="bg-[#2563eb] text-white text-lg font-black px-10 py-5 uppercase tracking-tighter hover:scale-105 transition-transform"
-              style={{ fontFamily: "'Epilogue', sans-serif", boxShadow: "0 0 30px rgba(37,99,235,0.4)" }}
+              className="flex items-center gap-2 px-8 py-3.5 bg-[#2563eb] text-white text-[11px] font-bold tracking-[1.5px] uppercase hover:bg-[#1d4ed8] transition-colors"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Go to Dashboard
+              Go to Dashboard <ArrowRight size={14} />
             </Link>
             <Link
               href="/dashboard/pricing"
-              className="border-2 border-white text-white text-lg font-black px-10 py-5 uppercase tracking-tighter hover:bg-white hover:text-black transition-all"
-              style={{ fontFamily: "'Epilogue', sans-serif" }}
+              className="flex items-center gap-2 px-8 py-3.5 border border-[rgba(67,70,85,0.4)] text-[11px] font-bold tracking-[1.5px] uppercase hover:border-[#2563eb] hover:text-[#2563eb] transition-colors"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             >
-              Upgrade to Premium
+              Upgrade to Premium <Zap size={14} />
             </Link>
           </div>
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/10 pt-10 max-w-4xl mx-auto">
-            {heroStats.map((s) => (
-              <div key={s.label} className="text-left">
-                <span className="block text-[10px] text-white/50 uppercase mb-1" style={{ fontFamily: "'Space Grotesk', monospace" }}>{s.label}</span>
-                <span className={`block font-bold text-sm tracking-widest uppercase ${s.highlight ? "text-[#2563eb]" : "text-white"}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.value}</span>
-              </div>
-            ))}
-          </div>
+        </div>
+      </section>
+
+      {/* Stats Strip */}
+      <section className="border-y border-[rgba(67,70,85,0.15)] bg-[#0e0e0e]">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4">
+          {heroStats.map((s, i) => (
+            <div key={s.label} className={`p-6 sm:p-8 text-center ${i < heroStats.length - 1 ? "border-r border-[rgba(67,70,85,0.15)]" : ""}`}>
+              <p className="text-[22px] sm:text-[28px] font-black text-[#2563eb]" style={{ fontFamily: "'Epilogue', sans-serif" }}>{s.value}</p>
+              <p className="text-[9px] tracking-[2px] uppercase text-[rgba(195,198,215,0.4)] mt-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -146,7 +156,7 @@ export default function LandingContent() {
             </div>
           </div>
 
-          <h2 className="text-5xl sm:text-6xl md:text-8xl font-black text-black text-center uppercase tracking-tighter mb-20 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-black text-center uppercase tracking-tighter mb-20 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
             India Spoke. Here&apos;s How.
           </h2>
 
@@ -215,7 +225,7 @@ export default function LandingContent() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div>
-              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
                 India Spoke.<br /><span className="text-[#2563eb]">We Listened.</span>
               </h2>
               <p className="text-white/60 max-w-md font-medium text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -285,7 +295,7 @@ export default function LandingContent() {
       <section className="py-24 px-6 relative overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div>
-            <h2 className="text-5xl sm:text-6xl font-black uppercase mb-8 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+            <h2 className="text-3xl sm:text-4xl font-black uppercase mb-8 leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
               The Ultimate<br /><span className="text-[#2563eb]">Tactical View</span>
             </h2>
             <div className="space-y-6">
@@ -350,7 +360,7 @@ export default function LandingContent() {
       {/* CTA */}
       <section className="py-20 px-6 border-t border-white/10">
         <div className="max-w-3xl mx-auto text-center">
-          <h3 className="text-[36px] sm:text-[48px] font-black tracking-[-2px] uppercase mb-6" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+          <h3 className="text-[28px] sm:text-[36px] font-black tracking-[-2px] uppercase mb-6" style={{ fontFamily: "'Epilogue', sans-serif" }}>
             Ready to <span className="text-[#2563eb]">Decode</span> the Game?
           </h3>
           <p className="text-white/40 mb-8 text-lg" style={{ fontFamily: "'Inter', sans-serif" }}>
