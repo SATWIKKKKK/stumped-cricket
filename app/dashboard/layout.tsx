@@ -3,7 +3,6 @@
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import TopNav from "@/components/layout/TopNav";
-import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/lib/ThemeContext";
 
 function AuthSuccessBanner() {
@@ -46,9 +45,8 @@ export default function DashboardLayout({
       <TopNav />
 
       <main className="flex-1 pt-[69px]">
-        <div className="min-h-[calc(100vh-69px-48px)]">{children}</div>
+        <div className="min-h-[calc(100vh-69px)]">{children}</div>
       </main>
-      <Footer />
 
       <Suspense fallback={null}>
         <AuthSuccessBanner />

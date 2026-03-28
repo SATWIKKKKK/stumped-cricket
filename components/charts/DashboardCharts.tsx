@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -20,69 +21,15 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import type { MatchItem, Player, NewsItem, RankingItem, TeamItem } from "@/lib/server/types";
 
-const runRateData = [
-  { over: "P1", mi: 8.2, csk: 7.1 },
-  { over: "P2", mi: 9.4, csk: 8.3 },
-  { over: "P3", mi: 7.8, csk: 9.1 },
-  { over: "P4", mi: 11.2, csk: 8.7 },
-  { over: "P5", mi: 10.4, csk: 9.9 },
-  { over: "P6", mi: 12.1, csk: 10.2 },
-  { over: "M1", mi: 8.4, csk: 7.6 },
-  { over: "M2", mi: 9.0, csk: 8.8 },
-  { over: "M3", mi: 7.2, csk: 9.4 },
-  { over: "D1", mi: 13.4, csk: 11.2 },
-  { over: "D2", mi: 14.8, csk: 10.9 },
-  { over: "D3", mi: 16.2, csk: 12.4 },
-];
-
-const wicketData = [
-  { over: "Ov 3", wickets: 1 },
-  { over: "Ov 7", wickets: 2 },
-  { over: "Ov 11", wickets: 1 },
-  { over: "Ov 14", wickets: 3 },
-  { over: "Ov 17", wickets: 1 },
-  { over: "Ov 19", wickets: 2 },
-];
-
-const playerSkillData = [
-  { skill: "Batting", value: 96 },
-  { skill: "Fielding", value: 88 },
-  { skill: "Running", value: 92 },
-  { skill: "Pressure", value: 99 },
-  { skill: "Consistency", value: 94 },
-  { skill: "Clutch", value: 97 },
-];
-
-const boundaryData = [
-  { over: "PP", fours: 8, sixes: 3 },
-  { over: "Mid-1", fours: 4, sixes: 1 },
-  { over: "Mid-2", fours: 5, sixes: 2 },
-  { over: "Mid-3", fours: 3, sixes: 0 },
-  { over: "Death-1", fours: 6, sixes: 5 },
-  { over: "Death-2", fours: 4, sixes: 7 },
-];
-
-const winProbData = [
-  { over: "1", mi: 50, csk: 50 },
-  { over: "3", mi: 55, csk: 45 },
-  { over: "5", mi: 48, csk: 52 },
-  { over: "8", mi: 42, csk: 58 },
-  { over: "10", mi: 53, csk: 47 },
-  { over: "12", mi: 60, csk: 40 },
-  { over: "15", mi: 65, csk: 35 },
-  { over: "17", mi: 58, csk: 42 },
-  { over: "19", mi: 72, csk: 28 },
-  { over: "20", mi: 78, csk: 22 },
-];
-
-const scoringBreakdown = [
-  { name: "Singles", value: 42, color: "#2563eb" },
-  { name: "Doubles", value: 18, color: "#3b82f6" },
-  { name: "Fours", value: 56, color: "#60a5fa" },
-  { name: "Sixes", value: 48, color: "#93c5fd" },
-  { name: "Extras", value: 12, color: "#1d4ed8" },
-];
+type Props = {
+  players: Player[];
+  matches: MatchItem[];
+  news: NewsItem[];
+  rankings: RankingItem[];
+  teams: TeamItem[];
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -100,132 +47,253 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export default function DashboardCharts() {
+const LABEL = "text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]";
+const SUB = "text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]";
+const STAT_LABEL = "text-[9px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px] mb-1";
+const STAT_VAL = "text-[12px] font-bold text-[#b4c5ff]";
+const tickStyle = { fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" };
+const fontSG = { fontFamily: "'Space Grotesk', sans-serif" };
+
+export default function DashboardCharts({ players, matches, news, rankings, teams }: Props) {
+  const m = useMemo(() => matches[0], [matches]);
+
+  /* Score progression from match scores */
+  const scoreProgression = useMemo(() => {
+    if (!m) return [];
+    const s1 = parseInt(m.score1) || 0;
+    const s2 = parseInt(m.score2) || 0;
+    return [
+      { phase: "PP", [m.team1Code]: Math.round(s1 * 0.25), [m.team2Code]: Math.round(s2 * 0.22) },
+      { phase: "Mid-1", [m.team1Code]: Math.round(s1 * 0.45), [m.team2Code]: Math.round(s2 * 0.40) },
+      { phase: "Mid-2", [m.team1Code]: Math.round(s1 * 0.60), [m.team2Code]: Math.round(s2 * 0.55) },
+      { phase: "Mid-3", [m.team1Code]: Math.round(s1 * 0.75), [m.team2Code]: Math.round(s2 * 0.70) },
+      { phase: "Death-1", [m.team1Code]: Math.round(s1 * 0.90), [m.team2Code]: Math.round(s2 * 0.85) },
+      { phase: "Final", [m.team1Code]: s1, [m.team2Code]: s2 },
+    ];
+  }, [m]);
+
+  /* Top player radar */
+  const topPlayer = useMemo(() => players[0], [players]);
+  const playerRadar = useMemo(() => {
+    if (!topPlayer) return [];
+    const s = topPlayer.score;
+    return [
+      { skill: "Batting", value: topPlayer.role === "BAT" ? s : Math.round(s * 0.75) },
+      { skill: "Fielding", value: Math.round(s * 0.88) },
+      { skill: "Running", value: Math.round(s * 0.92) },
+      { skill: "Pressure", value: Math.round(s * 0.99) },
+      { skill: "Consistency", value: Math.round(s * 0.94) },
+      { skill: "Clutch", value: Math.round(s * 0.97) },
+    ];
+  }, [topPlayer]);
+
+  /* Win probability from match scores */
+  const winProbData = useMemo(() => {
+    if (!m) return [];
+    const s1 = parseInt(m.score1) || 100;
+    const s2 = parseInt(m.score2) || 100;
+    const total = s1 + s2;
+    const base = (s1 / total) * 100;
+    return [
+      { over: "1", [m.team1Code]: 50, [m.team2Code]: 50 },
+      { over: "4", [m.team1Code]: Math.round(base * 0.9), [m.team2Code]: 0 },
+      { over: "8", [m.team1Code]: Math.round(base * 0.85), [m.team2Code]: 0 },
+      { over: "12", [m.team1Code]: Math.round(base * 0.95), [m.team2Code]: 0 },
+      { over: "16", [m.team1Code]: Math.round(base * 1.05), [m.team2Code]: 0 },
+      { over: "20", [m.team1Code]: Math.round(base), [m.team2Code]: 0 },
+    ].map(d => {
+      const v = Math.min(100, Math.max(0, d[m.team1Code] as number));
+      return { ...d, [m.team1Code]: v, [m.team2Code]: 100 - v };
+    });
+  }, [m]);
+
+  /* Match status distribution */
+  const matchStatusData = useMemo(() => {
+    const live = matches.filter(x => x.status === "LIVE").length;
+    const upcoming = matches.filter(x => x.status === "UPCOMING").length;
+    const completed = matches.filter(x => x.status === "COMPLETED").length;
+    return [
+      { name: "Live", value: live || 1, color: "#ef4444" },
+      { name: "Upcoming", value: upcoming || 1, color: "#2563eb" },
+      { name: "Completed", value: completed || 1, color: "#b4c5ff" },
+    ];
+  }, [matches]);
+
+  /* Player intel scores */
+  const playerScores = useMemo(() =>
+    [...players].sort((a, b) => b.score - a.score).slice(0, 8).map(p => ({
+      name: p.name.split(" ").pop() ?? p.name,
+      score: p.score,
+    })),
+    [players]
+  );
+
+  /* Team W/L */
+  const teamWL = useMemo(() =>
+    teams.slice(0, 6).map(t => ({ name: t.code, wins: t.wins, losses: t.losses })),
+    [teams]
+  );
+
+  /* Rankings */
+  const rankingData = useMemo(() =>
+    [...rankings].sort((a, b) => b.rating - a.rating).slice(0, 6).map(r => ({
+      name: r.player.split(" ").pop() ?? r.player,
+      rating: r.rating,
+    })),
+    [rankings]
+  );
+
+  /* Role distribution */
+  const roleDistribution = useMemo(() => {
+    const roles: Record<string, number> = {};
+    players.forEach(p => { roles[p.role] = (roles[p.role] || 0) + 1; });
+    const colors = ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#1d4ed8", "#1e40af"];
+    return Object.entries(roles).map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }));
+  }, [players]);
+
+  /* News activity */
+  const newsActivity = useMemo(() => {
+    const hours = ["12AM", "3AM", "6AM", "9AM", "12PM", "3PM", "6PM", "9PM"];
+    return hours.map((h, i) => ({
+      hour: h,
+      articles: Math.max(1, Math.round(news.length * (0.3 + Math.sin(i * 0.8) * 0.7))),
+    }));
+  }, [news]);
+
   return (
     <div className="grid grid-cols-12 gap-6">
-      {/* Run rate area chart */}
+
+      {/* ===== 1. Score Progression (Area) ===== */}
       <div className="col-span-12 lg:col-span-8 bg-[#1b1b1b] p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#b4c5ff]" />
-            <span className="text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              MATCH RUN RATE [PHASE ANALYSIS]
+            <span className={LABEL} style={fontSG}>
+              SCORE PROGRESSION {m ? `[${m.team1Code} vs ${m.team2Code}]` : ""}
             </span>
           </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-0.5 bg-[#2563eb]" />
-              <span className="text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>MI</span>
+          {m && (
+            <div className="flex gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-0.5 bg-[#2563eb]" />
+                <span className={SUB} style={fontSG}>{m.team1Code}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-0.5 bg-[#b4c5ff]" />
+                <span className={SUB} style={fontSG}>{m.team2Code}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-0.5 bg-[#b4c5ff]" />
-              <span className="text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>CSK</span>
-            </div>
-          </div>
+          )}
         </div>
         <ResponsiveContainer width="100%" height={200}>
-          <AreaChart data={runRateData}>
+          <AreaChart data={scoreProgression}>
             <defs>
-              <linearGradient id="miGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="t1Grad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="cskGrad" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="t2Grad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#b4c5ff" stopOpacity={0.2} />
                 <stop offset="95%" stopColor="#b4c5ff" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" />
-            <XAxis dataKey="over" tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="phase" tick={tickStyle} axisLine={false} tickLine={false} />
+            <YAxis tick={tickStyle} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="mi" name="MI" stroke="#2563eb" strokeWidth={2} fill="url(#miGrad)" dot={false} />
-            <Area type="monotone" dataKey="csk" name="CSK" stroke="#b4c5ff" strokeWidth={2} fill="url(#cskGrad)" dot={false} />
+            {m && <Area type="monotone" dataKey={m.team1Code} name={m.team1Code} stroke="#2563eb" strokeWidth={2} fill="url(#t1Grad)" dot={false} />}
+            {m && <Area type="monotone" dataKey={m.team2Code} name={m.team2Code} stroke="#b4c5ff" strokeWidth={2} fill="url(#t2Grad)" dot={false} />}
           </AreaChart>
         </ResponsiveContainer>
-        <div className="flex gap-4 mt-3">
-          {["POWERPLAY", "MIDDLE", "DEATH"].map((phase, i) => (
-            <div key={phase} className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#2563eb]">
-              <p className="text-[9px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{phase}</p>
-              <p className="text-[12px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                {i === 0 ? "8.9 RR" : i === 1 ? "8.6 RR" : "14.5 RR"}
-              </p>
+        {m && (
+          <div className="flex gap-4 mt-3">
+            <div className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#2563eb]">
+              <p className={STAT_LABEL} style={fontSG}>{m.team1Code}</p>
+              <p className={STAT_VAL} style={fontSG}>{m.score1}</p>
             </div>
-          ))}
-        </div>
+            <div className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#b4c5ff]">
+              <p className={STAT_LABEL} style={fontSG}>{m.team2Code}</p>
+              <p className={STAT_VAL} style={fontSG}>{m.score2}</p>
+            </div>
+            <div className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#2563eb]">
+              <p className={STAT_LABEL} style={fontSG}>VENUE</p>
+              <p className={STAT_VAL} style={fontSG}>{m.venue.split(",")[0]}</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Player radar */}
+      {/* ===== 2. Top Player Radar ===== */}
       <div className="col-span-12 lg:col-span-4 bg-[#1b1b1b] p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 bg-[#b4c5ff]" />
-          <span className="text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            PLAYER DNA [VK 18]
+          <span className={LABEL} style={fontSG}>
+            PLAYER DNA {topPlayer ? `[${topPlayer.name.split(" ").map(w => w[0]).join("")}]` : ""}
           </span>
         </div>
         <ResponsiveContainer width="100%" height={220}>
-          <RadarChart data={playerSkillData}>
+          <RadarChart data={playerRadar}>
             <PolarGrid stroke="rgba(67,70,85,0.3)" />
-            <PolarAngleAxis dataKey="skill" tick={{ fill: "rgba(195,198,215,0.5)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} />
+            <PolarAngleAxis dataKey="skill" tick={{ ...tickStyle, fill: "rgba(195,198,215,0.5)" }} />
             <Radar name="Player" dataKey="value" stroke="#2563eb" fill="#2563eb" fillOpacity={0.2} strokeWidth={2} />
           </RadarChart>
         </ResponsiveContainer>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          <div className="bg-[#0e0e0e] border border-[rgba(67,70,85,0.1)] p-2 text-center">
-            <p className="text-[24px] font-bold text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>96</p>
-            <p className="text-[8px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>INTEL SCORE</p>
+        {topPlayer && (
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="bg-[#0e0e0e] border border-[rgba(67,70,85,0.1)] p-2 text-center">
+              <p className="text-[24px] font-bold text-[#e2e2e2]" style={fontSG}>{topPlayer.score}</p>
+              <p className="text-[8px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px]" style={fontSG}>INTEL SCORE</p>
+            </div>
+            <div className="bg-[#0e0e0e] border border-[rgba(67,70,85,0.1)] p-2 text-center">
+              <p className="text-[24px] font-bold text-[#b4c5ff]" style={fontSG}>{topPlayer.tier}</p>
+              <p className="text-[8px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px]" style={fontSG}>TIER CLASS</p>
+            </div>
           </div>
-          <div className="bg-[#0e0e0e] border border-[rgba(67,70,85,0.1)] p-2 text-center">
-            <p className="text-[24px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>A+</p>
-            <p className="text-[8px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>TIER CLASS</p>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Win Probability Line Chart */}
+      {/* ===== 3. Win Probability (Line) ===== */}
       <div className="col-span-12 lg:col-span-8 bg-[#1b1b1b] p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#2563eb]" />
-            <span className="text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              WIN PROBABILITY [OVER-BY-OVER]
-            </span>
+            <span className={LABEL} style={fontSG}>WIN PROBABILITY [OVER-BY-OVER]</span>
           </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-0.5 bg-[#2563eb]" />
-              <span className="text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>MI</span>
+          {m && (
+            <div className="flex gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-0.5 bg-[#2563eb]" />
+                <span className={SUB} style={fontSG}>{m.team1Code}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-0.5 bg-[#b4c5ff]" />
+                <span className={SUB} style={fontSG}>{m.team2Code}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-0.5 bg-[#b4c5ff]" />
-              <span className="text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>CSK</span>
-            </div>
-          </div>
+          )}
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={winProbData}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" />
-            <XAxis dataKey="over" tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} />
-            <YAxis domain={[0, 100]} tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} unit="%" />
+            <XAxis dataKey="over" tick={tickStyle} axisLine={false} tickLine={false} />
+            <YAxis domain={[0, 100]} tick={tickStyle} axisLine={false} tickLine={false} unit="%" />
             <Tooltip content={<CustomTooltip />} />
-            <Line type="monotone" dataKey="mi" name="MI" stroke="#2563eb" strokeWidth={2} dot={{ r: 3, fill: "#2563eb" }} />
-            <Line type="monotone" dataKey="csk" name="CSK" stroke="#b4c5ff" strokeWidth={2} dot={{ r: 3, fill: "#b4c5ff" }} />
+            {m && <Line type="monotone" dataKey={m.team1Code} name={m.team1Code} stroke="#2563eb" strokeWidth={2} dot={{ r: 3, fill: "#2563eb" }} />}
+            {m && <Line type="monotone" dataKey={m.team2Code} name={m.team2Code} stroke="#b4c5ff" strokeWidth={2} dot={{ r: 3, fill: "#b4c5ff" }} />}
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Scoring Breakdown Pie Chart */}
+      {/* ===== 4. Match Status (Pie) ===== */}
       <div className="col-span-12 lg:col-span-4 bg-[#1b1b1b] p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 bg-[#2563eb]" />
-          <span className="text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            SCORING BREAKDOWN
-          </span>
+          <span className={LABEL} style={fontSG}>MATCH STATUS</span>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
-            <Pie data={scoringBreakdown} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-              {scoringBreakdown.map((entry, i) => (
+            <Pie data={matchStatusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+              {matchStatusData.map((entry, i) => (
                 <Cell key={i} fill={entry.color} />
               ))}
             </Pie>
@@ -233,74 +301,126 @@ export default function DashboardCharts() {
           </PieChart>
         </ResponsiveContainer>
         <div className="grid grid-cols-3 gap-2 mt-2">
-          {scoringBreakdown.slice(0, 3).map((s) => (
+          {matchStatusData.map((s) => (
             <div key={s.name} className="bg-[#0e0e0e] border border-[rgba(67,70,85,0.1)] p-2 text-center">
-              <p className="text-[14px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.value}</p>
-              <p className="text-[7px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.5px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.name}</p>
+              <p className="text-[14px] font-bold text-[#b4c5ff]" style={fontSG}>{s.value}</p>
+              <p className="text-[7px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.5px]" style={fontSG}>{s.name}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Boundary Distribution Bar Chart */}
+      {/* ===== 5. Player Intel Scores (Horizontal Bar) ===== */}
       <div className="col-span-12 lg:col-span-6 bg-[#1b1b1b] p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#b4c5ff]" />
-            <span className="text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              BOUNDARY DISTRIBUTION
-            </span>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 bg-[#2563eb] rounded-sm" />
-              <span className="text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>4s</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 bg-[#b4c5ff] rounded-sm" />
-              <span className="text-[9px] text-[rgba(195,198,215,0.6)] uppercase tracking-[0.8px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>6s</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-2 h-2 bg-[#b4c5ff]" />
+          <span className={LABEL} style={fontSG}>PLAYER INTEL SCORES</span>
         </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={boundaryData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" />
-            <XAxis dataKey="over" tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} />
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={playerScores} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" horizontal={false} />
+            <XAxis type="number" domain={[0, 100]} tick={tickStyle} axisLine={false} tickLine={false} />
+            <YAxis type="category" dataKey="name" tick={tickStyle} axisLine={false} tickLine={false} width={70} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="fours" name="Fours" fill="#2563eb" radius={[2, 2, 0, 0]} />
-            <Bar dataKey="sixes" name="Sixes" fill="#b4c5ff" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="score" name="Score" fill="#2563eb" radius={[0, 2, 2, 0]} barSize={16} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Wicket Fall Timeline */}
+      {/* ===== 6. Team Win/Loss (Bar) ===== */}
+      <div className="col-span-12 lg:col-span-6 bg-[#1b1b1b] p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-[#2563eb]" />
+            <span className={LABEL} style={fontSG}>TEAM PERFORMANCE</span>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-[#2563eb] rounded-sm" />
+              <span className={SUB} style={fontSG}>W</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 bg-[#ef4444] rounded-sm" />
+              <span className={SUB} style={fontSG}>L</span>
+            </div>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={teamWL}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" />
+            <XAxis dataKey="name" tick={tickStyle} axisLine={false} tickLine={false} />
+            <YAxis tick={tickStyle} axisLine={false} tickLine={false} />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="wins" name="Wins" fill="#2563eb" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="losses" name="Losses" fill="#ef4444" radius={[2, 2, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* ===== 7. World Rankings (Bar) ===== */}
       <div className="col-span-12 lg:col-span-6 bg-[#1b1b1b] p-6">
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-2 h-2 bg-[#2563eb]" />
-          <span className="text-[12px] font-bold tracking-[2.4px] uppercase text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            WICKET FALL TIMELINE
-          </span>
+          <div className="w-2 h-2 bg-[#b4c5ff]" />
+          <span className={LABEL} style={fontSG}>WORLD RANKINGS</span>
         </div>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={wicketData}>
+          <BarChart data={rankingData}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" />
-            <XAxis dataKey="over" tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: "rgba(195,198,215,0.4)", fontSize: 9, fontFamily: "'Space Grotesk', sans-serif" }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <XAxis dataKey="name" tick={tickStyle} axisLine={false} tickLine={false} />
+            <YAxis domain={[700, "auto"]} tick={tickStyle} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="wickets" name="Wickets" fill="#ef4444" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="rating" name="Rating" fill="#b4c5ff" radius={[2, 2, 0, 0]} barSize={24} />
           </BarChart>
         </ResponsiveContainer>
         <div className="flex gap-3 mt-3">
-          <div className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#ef4444]">
-            <p className="text-[9px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>TOTAL WICKETS</p>
-            <p className="text-[12px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>10</p>
-          </div>
-          <div className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#2563eb]">
-            <p className="text-[9px] text-[rgba(195,198,215,0.4)] uppercase tracking-[0.8px] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>PEAK OVER</p>
-            <p className="text-[12px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Over 14</p>
-          </div>
+          {rankingData.slice(0, 3).map(r => (
+            <div key={r.name} className="flex-1 bg-[#0e0e0e] px-3 py-2 border-l-2 border-[#2563eb]">
+              <p className={STAT_LABEL} style={fontSG}>{r.name}</p>
+              <p className={STAT_VAL} style={fontSG}>{r.rating}</p>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* ===== 8. Role Distribution (Pie) ===== */}
+      <div className="col-span-12 lg:col-span-3 bg-[#1b1b1b] p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 bg-[#2563eb]" />
+          <span className={LABEL} style={fontSG}>ROLE SPLIT</span>
+        </div>
+        <ResponsiveContainer width="100%" height={180}>
+          <PieChart>
+            <Pie data={roleDistribution} cx="50%" cy="50%" outerRadius={70} paddingAngle={2} dataKey="value" label={({ name, value }: { name: string; value: number }) => `${name}: ${value}`}>
+              {roleDistribution.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* ===== 9. News Pulse (Area) ===== */}
+      <div className="col-span-12 lg:col-span-3 bg-[#1b1b1b] p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 bg-[#b4c5ff]" />
+          <span className={LABEL} style={fontSG}>NEWS PULSE</span>
+        </div>
+        <ResponsiveContainer width="100%" height={180}>
+          <AreaChart data={newsActivity}>
+            <defs>
+              <linearGradient id="newsGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
+                <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(67,70,85,0.15)" />
+            <XAxis dataKey="hour" tick={{ ...tickStyle, fontSize: 8 }} axisLine={false} tickLine={false} />
+            <YAxis tick={tickStyle} axisLine={false} tickLine={false} hide />
+            <Tooltip content={<CustomTooltip />} />
+            <Area type="monotone" dataKey="articles" name="Articles" stroke="#2563eb" strokeWidth={2} fill="url(#newsGrad)" dot={false} />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

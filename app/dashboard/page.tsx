@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, TrendingUp, Users, Trophy, Radio } from "lucide-react";
 import DashboardCharts from "@/components/charts/DashboardCharts";
-import type { MatchItem, NewsItem, Player } from "@/lib/server/types";
+import type { MatchItem, NewsItem, Player, RankingItem, TeamItem } from "@/lib/server/types";
 
 type BootstrapResponse = {
   data?: {
     players?: Player[];
     matches?: MatchItem[];
     news?: NewsItem[];
+    rankings?: RankingItem[];
+    teams?: TeamItem[];
   };
 };
 
@@ -18,6 +20,8 @@ export default function DashboardPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<MatchItem[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [rankings, setRankings] = useState<RankingItem[]>([]);
+  const [teams, setTeams] = useState<TeamItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +35,8 @@ export default function DashboardPage() {
           setPlayers(payload.data?.players ?? []);
           setMatches(payload.data?.matches ?? []);
           setNews(payload.data?.news ?? []);
+          setRankings(payload.data?.rankings ?? []);
+          setTeams(payload.data?.teams ?? []);
         }
       } finally {
         if (!ignore) {
@@ -86,19 +92,13 @@ export default function DashboardPage() {
   return (
     <div className="p-4 sm:p-8 flex flex-col gap-8 sm:gap-12 max-w-[1280px]">
       <div className="border-l-4 border-[#b4c5ff] pl-5 sm:pl-7 flex flex-col gap-2">
-        <h1 className="text-[clamp(36px,6vw,60px)] font-black tracking-[-3px] uppercase text-[#e2e2e2] leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
+        <h1 className=" text-[clamp(36px,6vw,60px)] font-black tracking-[-3px] uppercase text-[#e2e2e2] leading-none" style={{ fontFamily: "'Epilogue', sans-serif" }}>
           MATCH CENTRE
         </h1>
         <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-[11px] sm:text-[12px] tracking-[3px] sm:tracking-[3.6px] uppercase text-[rgba(226,226,226,0.4)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-            AI-Powered Intelligence // Real-Time Analytics
-          </span>
+          
           <div className="hidden sm:block flex-1 h-px bg-[rgba(67,70,85,0.2)]" />
-          <div className="bg-[#e2e2e2] px-2 py-0.5 shrink-0">
-            <span className="text-[10px] font-bold uppercase text-[#131313]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              DATA CHANNEL LIVE
-            </span>
-          </div>
+          
         </div>
       </div>
 
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                 <span className="text-[9px] sm:text-[10px] font-bold tracking-[1.2px] uppercase text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   {stat.label}
                 </span>
-                <Icon size={13} className="text-[rgba(180,197,255,0.4)]" />
+                <Icon size={13} className="text-[rgba(15,66,232,0.4)]" />
               </div>
               <p className="text-[24px] sm:text-[32px] font-bold text-[#b4c5ff] leading-none" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {stat.value}
@@ -227,7 +227,7 @@ export default function DashboardPage() {
             RUN RATE ANALYTICS
           </h2>
         </div>
-        <DashboardCharts />
+        <DashboardCharts players={players} matches={matches} news={news} rankings={rankings} teams={teams} />
       </div>
     </div>
   );
