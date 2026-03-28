@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 export default async function RootPage() {
   const session = await auth();
   if (session?.user?.id) {
-    redirect("/landing");
+    redirect("/dashboard");
   }
-  redirect("/auth/sign-up");
+  redirect("/landing");
 }

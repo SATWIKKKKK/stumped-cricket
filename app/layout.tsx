@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "STUMPED AI — Cricket Intelligence System",
@@ -28,7 +29,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#131313] text-[#e2e2e2] antialiased min-h-screen">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
