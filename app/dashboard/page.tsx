@@ -159,7 +159,7 @@ export default function DashboardPage() {
 
       {!liveMatch && !loading && (
         <div className="bg-[#1b1b1b] border border-[rgba(67,70,85,0.2)] p-6 text-[12px] text-[rgba(195,198,215,0.6)] uppercase tracking-[1px]">
-          No matches available yet. Run sync and refresh.
+          No live matches right now. Check back later.
         </div>
       )}
 
@@ -202,8 +202,8 @@ export default function DashboardPage() {
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between border-t border-[rgba(67,70,85,0.2)] pt-5">
                   <div>
-                    <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>AI PREDICTION</p>
-                    <p className="text-[12px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.aiPrediction}</p>
+                    <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>STATUS</p>
+                    <p className="text-[12px] font-bold text-[#b4c5ff] max-w-[360px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.result || liveMatch.aiPrediction}</p>
                   </div>
                   <Link href={`/dashboard/matches/${liveMatch.id}`} className="bg-[#b4c5ff] px-5 py-3 flex items-center justify-center gap-2 hover:bg-white transition-colors group self-start sm:self-auto">
                     <span className="text-[14px] sm:text-[16px] font-bold tracking-[1.6px] uppercase text-[#131313]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
