@@ -229,6 +229,10 @@ body {
 [data-theme="light"] [class*="text-[rgba(195,198,215,"] { color: #475569 !important; }
 [data-theme="light"] [class*="text-[rgba(226,226,226,"] { color: #475569 !important; }
 
+/* LIVE ANALYSIS button: dark text on blue bg → white text */
+[data-theme="light"] [class*="bg-[#b4c5ff]"] [class*="text-[#131313]"] { color: #ffffff !important; }
+[data-theme="light"] [class*="bg-[#b4c5ff]"]:hover [class*="text-[#131313]"] { color: #1e3a8a !important; }
+
 /* Hover text */
 [data-theme="light"] [class*="hover:text-[#e2e2e2]"]:hover { color: #1e3a8a !important; }
 [data-theme="light"] [class*="hover:text-[#b4c5ff]"]:hover { color: #1d4ed8 !important; }

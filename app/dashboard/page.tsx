@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { ArrowRight, TrendingUp, Users, Trophy, Radio } from "lucide-react";
 import DashboardCharts from "@/components/charts/DashboardCharts";
+import TeamSelector from "@/components/TeamSelector";
 import type { MatchItem, NewsItem, Player, RankingItem, TeamItem } from "@/lib/server/types";
 
 type BootstrapResponse = {
@@ -23,7 +24,10 @@ export default function DashboardPage() {
   const [rankings, setRankings] = useState<RankingItem[]>([]);
   const [teams, setTeams] = useState<TeamItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [matchupLoading, setMatchupLoading] = useState(false);
+  const [activeMatchup, setActiveMatchup] = useState<string | null>(null);
 
+  /* Default bootstrap load */
   useEffect(() => {
     let ignore = false;
 
@@ -52,6 +56,23 @@ export default function DashboardPage() {
       ignore = true;
       clearInterval(interval);
     };
+  }, []);
+
+  /* Matchup handler */
+  const handleMatchup = useCallback(async (team1Code: string, team2Code: string) => {
+    setMatchupLoading(true);
+    try {
+      const res = await fetch(`/api/matchup?team1=${team1Code}&team2=${team2Code}`, { cache: "no-store" });
+      const payload = (await res.json()) as BootstrapResponse;
+      setPlayers(payload.data?.players ?? []);
+      setMatches(payload.data?.matches ?? []);
+      setNews(payload.data?.news ?? []);
+      setRankings(payload.data?.rankings ?? []);
+      setTeams(payload.data?.teams ?? []);
+      setActiveMatchup(`${team1Code} vs ${team2Code}`);
+    } finally {
+      setMatchupLoading(false);
+    }
   }, []);
 
   const liveMatch = useMemo(() => matches.find((m) => m.status === "LIVE") ?? matches[0], [matches]);
@@ -96,11 +117,18 @@ export default function DashboardPage() {
           MATCH CENTRE
         </h1>
         <div className="flex items-center gap-4 flex-wrap">
-          
+          {activeMatchup && (
+            <span className="text-[10px] font-bold tracking-[1.2px] uppercase text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              {activeMatchup}
+            </span>
+          )}
           <div className="hidden sm:block flex-1 h-px bg-[rgba(67,70,85,0.2)]" />
           
         </div>
       </div>
+
+      {/* Team Selector */}
+      <TeamSelector onSubmit={handleMatchup} loading={matchupLoading} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {[
