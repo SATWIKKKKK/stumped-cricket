@@ -75,7 +75,13 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const liveMatch = useMemo(() => matches.find((m) => m.status === "LIVE") ?? matches[0], [matches]);
+  const featuredMatch = useMemo(() => {
+    const live = matches.find((m) => m.status === "LIVE");
+    if (live) return live;
+    const upcoming = matches.find((m) => m.status === "UPCOMING");
+    if (upcoming) return upcoming;
+    return matches[0]; // latest completed
+  }, [matches]);
   const liveCount = useMemo(() => matches.filter((m) => m.status === "LIVE").length, [matches]);
   const todayMatches = matches.length;
   const topPlayers = useMemo(() => [...players].sort((a, b) => b.score - a.score).slice(0, 3), [players]);
@@ -157,57 +163,71 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {!liveMatch && !loading && (
+      {!featuredMatch && !loading && (
         <div className="bg-[#1b1b1b] border border-[rgba(67,70,85,0.2)] p-6 text-[12px] text-[rgba(195,198,215,0.6)] uppercase tracking-[1px]">
-          No live matches right now. Check back later.
+          No matches right now. Check back later.
         </div>
       )}
 
-      {liveMatch && (
+      {featuredMatch && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="bg-[#1b1b1b] border-l border-[rgba(180,197,255,0.2)] p-5 sm:p-8 relative overflow-hidden">
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4 flex-wrap">
                   <span className="text-[11px] sm:text-[12px] font-bold tracking-[1.2px] uppercase text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {liveMatch.tournament}
+                    {featuredMatch.tournament}
                   </span>
-                  <div className="bg-[#2563eb] px-3 py-1 flex items-center gap-1.5">
+                  <div className={`px-3 py-1 flex items-center gap-1.5 ${
+                    featuredMatch.status === "LIVE" ? "bg-[#16a34a]" :
+                    featuredMatch.status === "UPCOMING" ? "bg-[#2563eb]" :
+                    "bg-[#555]"
+                  }`}>
                     <Radio size={8} className="text-white" />
                     <span className="text-[9px] font-bold uppercase text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {liveMatch.status}
+                      {featuredMatch.status}
                     </span>
                   </div>
                 </div>
 
                 <h2 className="text-[clamp(22px,4vw,36px)] font-black tracking-[-1.8px] uppercase text-[#e2e2e2] leading-tight mb-5" style={{ fontFamily: "'Epilogue', sans-serif" }}>
-                  {liveMatch.team1.toUpperCase()} vs {liveMatch.team2.toUpperCase()}
+                  {featuredMatch.team1.toUpperCase()} vs {featuredMatch.team2.toUpperCase()}
                 </h2>
 
+                {featuredMatch.status !== "UPCOMING" && (
                 <div className="flex flex-wrap items-start gap-6 sm:gap-10 mb-6">
                   <div>
-                    <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.team1Code}</p>
-                    <p className="text-[24px] sm:text-[32px] font-bold text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.score1}</p>
-                    <p className="text-[10px] text-[rgba(226,226,226,0.4)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.overs1} OVS</p>
+                    <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.team1Code}</p>
+                    <p className="text-[24px] sm:text-[32px] font-bold text-[#e2e2e2]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.score1}</p>
+                    <p className="text-[10px] text-[rgba(226,226,226,0.4)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.overs1} OVS</p>
                   </div>
                   <div className="flex items-center self-center">
                     <span className="text-[16px] text-[rgba(226,226,226,0.2)]" style={{ fontFamily: "'Epilogue', sans-serif" }}>VS</span>
                   </div>
                   <div>
-                    <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.team2Code}</p>
-                    <p className="text-[24px] sm:text-[32px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.score2}</p>
-                    <p className="text-[10px] text-[rgba(226,226,226,0.4)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.overs2} OVS</p>
+                    <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.team2Code}</p>
+                    <p className="text-[24px] sm:text-[32px] font-bold text-[#b4c5ff]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.score2}</p>
+                    <p className="text-[10px] text-[rgba(226,226,226,0.4)]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.overs2} OVS</p>
                   </div>
                 </div>
+                )}
+
+                {featuredMatch.status === "UPCOMING" && (
+                <div className="flex items-center gap-3 mb-6 py-4">
+                  <span className="text-[12px] text-[rgba(195,198,215,0.6)] uppercase tracking-[1px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {featuredMatch.venue} · {featuredMatch.format}
+                  </span>
+                </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between border-t border-[rgba(67,70,85,0.2)] pt-5">
                   <div>
                     <p className="text-[9px] text-[rgba(226,226,226,0.3)] uppercase mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>STATUS</p>
-                    <p className="text-[12px] font-bold text-[#b4c5ff] max-w-[360px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{liveMatch.result || liveMatch.aiPrediction}</p>
+                    <p className="text-[12px] font-bold text-[#b4c5ff] max-w-[360px]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{featuredMatch.result || featuredMatch.aiPrediction}</p>
                   </div>
-                  <Link href={`/dashboard/matches/${liveMatch.id}`} className="bg-[#b4c5ff] px-5 py-3 flex items-center justify-center gap-2 hover:bg-white transition-colors group self-start sm:self-auto">
+                  <Link href={`/dashboard/matches/${featuredMatch.id}`} className="bg-[#b4c5ff] px-5 py-3 flex items-center justify-center gap-2 hover:bg-white transition-colors group self-start sm:self-auto">
                     <span className="text-[14px] sm:text-[16px] font-bold tracking-[1.6px] uppercase text-[#131313]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      LIVE ANALYSIS
+                      {featuredMatch.status === "LIVE" ? "LIVE ANALYSIS" : featuredMatch.status === "UPCOMING" ? "MATCH PREVIEW" : "MATCH RECAP"}
                     </span>
                     <ArrowRight size={14} className="text-[#131313] group-hover:translate-x-1 transition-transform" />
                   </Link>

@@ -293,7 +293,20 @@ export class CricbuzzProvider implements CricketDataProvider {
       }
     }
 
-    const matches = uniqueMatches.map(cbMatchToProvider);
+    // Sort: LIVE first, then UPCOMING by start time, then COMPLETED by start time desc
+    const statusPriority: Record<string, number> = { LIVE: 0, UPCOMING: 1, COMPLETED: 2 };
+    const mapped = uniqueMatches.map(cbMatchToProvider);
+    mapped.sort((a, b) => {
+      const pa = statusPriority[a.status] ?? 2;
+      const pb = statusPriority[b.status] ?? 2;
+      if (pa !== pb) return pa - pb;
+      // Within same status, sort by startTimeUtc
+      const ta = Number(a.startTimeUtc || 0);
+      const tb = Number(b.startTimeUtc || 0);
+      if (a.status === "COMPLETED") return tb - ta; // newest first
+      return ta - tb; // soonest first
+    });
+    const matches = mapped;
     const news = newsRaw
       .map(cbStoryToProvider)
       .filter((n): n is ProviderNews => n !== null);
